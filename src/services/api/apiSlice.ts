@@ -13,6 +13,7 @@ export const apiSlice = createApi({
     "modalities",
     "diseases",
     "final_recommendations",
+    "filter_ids",
   ],
   endpoints: () => ({}),
 });

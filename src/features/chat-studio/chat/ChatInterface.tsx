@@ -7,11 +7,12 @@ import { ChatMessage } from "./ChatMessage";
 import {
   addMessage,
   Message,
+  selectAllFilterIds,
   selectAllMessages,
 } from "@/libs/redux/chatMessagesSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useRef, useState } from "react";
-import TypingLoader from "@/features/shared/TypingLoadder";
+import TypingLoader from "@/components/shared/TypingLoadder";
 import { useAddQueryMutation } from "@/services/chatApi";
 import { toast } from "sonner";
 
@@ -28,8 +29,10 @@ const ChatInterface = ({
   setIsLeftPanelOpen,
   setIsRightPanelOpen,
 }: Props) => {
-  const chatMessages = useSelector(selectAllMessages);
   const dispatch = useDispatch();
+
+  const chatMessages = useSelector(selectAllMessages);
+  const filterIds = useSelector(selectAllFilterIds);
 
   const [addQuery, { isLoading }] = useAddQueryMutation();
 
@@ -54,7 +57,7 @@ const ChatInterface = ({
     setInputText("");
     dispatch(addMessage(newMessage));
 
-    addQuery({ query: inputText, filtered_ids: [] })
+    addQuery({ query: inputText, filtered_ids: filterIds?.ids ?? [] })
       .unwrap()
       .then((response: string) => {
         console.log("response", response);

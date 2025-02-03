@@ -4,44 +4,60 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form } from "@/components/ui/form";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { setFilterIds } from "@/libs/redux/chatMessagesSlice";
 import {
-  agenciesMockData,
-  biomarkersMockData,
-  countriesMockData,
-  diseasesMockData,
-  drugsMockData,
-  finalRecommendationsMockData,
-  modalitiesMockData,
-} from "@/utils/data";
-// import {
-//   useGetAvailableAgenciesQuery,
-//   useGetAvailableBiomarkersQuery,
-//   useGetAvailableCountriesQuery,
-//   useGetAvailableDiseasesQuery,
-//   useGetAvailableDrugsQuery,
-//   useGetAvailableFinalRecommendationsQuery,
-//   useGetAvailableModalitiesQuery,
-// } from "@/services/filters/filtersApi";
-// import { formatSelectOptions } from "@/utils/helpers";
-import { useForm } from "react-hook-form";
+  useGetAvailableAgenciesQuery,
+  useGetAvailableBiomarkersQuery,
+  useGetAvailableCountriesQuery,
+  useGetAvailableDiseasesQuery,
+  useGetAvailableDrugsQuery,
+  useGetAvailableFinalRecommendationsQuery,
+  useGetAvailableModalitiesQuery,
+  useGetFilterIdsQuery,
+} from "@/services/filters/filtersApi";
+import {
+  convertObjectToQueryString,
+  formatSelectOptions,
+  formatSelectValues,
+} from "@/utils/helpers";
 import { FiltersSchema, FiltersSchemaType } from "@/validators/filtersSchema";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { useDispatch } from "react-redux";
 
 const FilterConfigController = () => {
-  // const { data: countries, isLoading: isCountriesLoading } =
-  //   useGetAvailableCountriesQuery();
-  // const { data: agencies, isLoading: isAgenciesLoading } =
-  //   useGetAvailableAgenciesQuery();
-  // const { data: drugs, isLoading: isDrugsLoading } =
-  //   useGetAvailableDrugsQuery();
-  // const { data: biomarkers, isLoading: isBiomarkersLoading } =
-  //   useGetAvailableBiomarkersQuery();
-  // const { data: modalities, isLoading: isModalitiesLoading } =
-  //   useGetAvailableModalitiesQuery();
-  // const { data: diseases, isLoading: isDiseasesLoading } =
-  //   useGetAvailableDiseasesQuery();
-  // const { data: recommendations, isLoading: isRecommendationsLoading } =
-  //   useGetAvailableFinalRecommendationsQuery();
+  const dispatch = useDispatch();
+
+  const [selectedFilterIds, setSelectedFilterIds] = useState("");
+
+  const { data: countries, isLoading: isCountriesLoading } =
+    useGetAvailableCountriesQuery();
+  const { data: agencies, isLoading: isAgenciesLoading } =
+    useGetAvailableAgenciesQuery();
+  const { data: drugs, isLoading: isDrugsLoading } =
+    useGetAvailableDrugsQuery();
+  const { data: biomarkers, isLoading: isBiomarkersLoading } =
+    useGetAvailableBiomarkersQuery();
+  const { data: modalities, isLoading: isModalitiesLoading } =
+    useGetAvailableModalitiesQuery();
+  const { data: diseases, isLoading: isDiseasesLoading } =
+    useGetAvailableDiseasesQuery();
+  const { data: recommendations, isLoading: isRecommendationsLoading } =
+    useGetAvailableFinalRecommendationsQuery();
+
+  const { data: filterIds, isFetching } = useGetFilterIdsQuery(
+    selectedFilterIds,
+    {
+      refetchOnMountOrArgChange: true,
+    }
+  );
+
+  useEffect(() => {
+    if (filterIds) {
+      dispatch(setFilterIds(filterIds));
+    }
+  }, [filterIds]);
 
   const form = useForm<FiltersSchemaType>({
     resolver: zodResolver(FiltersSchema),
@@ -57,78 +73,96 @@ const FilterConfigController = () => {
   });
 
   const handleSubmit = (data: FiltersSchemaType) => {
-    console.log("data", data);
+    const filtersData = Object.entries(data).reduce(
+      (acc: { [key: string]: string[] }, [key, value]) => {
+        if (Array.isArray(value) && value.length > 0) {
+          acc[key] = formatSelectValues(value);
+        }
+        return acc;
+      },
+      {}
+    );
+
+    setSelectedFilterIds(convertObjectToQueryString(filtersData));
   };
 
   return (
-    <Card className="h-[calc(100vh-2rem)] m-4 !border-gray-50">
-      <CardHeader className="flex-none">
+    <Card className="h-[calc(100vh-2rem)] m-4 !border-gray-50 relative">
+      {filterIds?.ids && (
+        <div className="text-center absolute right-4 top-4">
+          <div className="bg-primary-100 text-primary-700 font-semibold text-2xl py-2 rounded-lg">
+            {filterIds.ids.length > 0 &&
+            filterIds.ids.length < 10 &&
+            filterIds.ids.length
+              ? `0${filterIds.ids.length}`
+              : filterIds.ids.length}
+          </div>
+          <p className="text-xs text-gray-500 font-medium mt-1">
+            Records Selected
+          </p>
+        </div>
+      )}
+      <CardHeader className="flex flex-row justify-between">
         <CardTitle className="text-xl">Filter Configuration</CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-col h-[calc(100%-5rem)] pt-0 relative">
+      <CardContent className="flex flex-col h-[calc(100%-5rem)] pt-4 relative">
         <Form {...form}>
           <ScrollArea className="flex-1 h-[calc(100%-4rem)] -mr-6 pr-6">
             <form className="space-y-6 mb-6" action="apply-filters">
               <HookFormItem name="countries" label="Country">
                 <MultiSelect
-                  options={countriesMockData}
-                  // options={
-                  //   countries?.countries
-                  //     ? formatSelectOptions(countries.countries)
-                  //     : []
-                  // }
-                  // isLoading={isCountriesLoading}
+                  options={
+                    countries?.countries
+                      ? formatSelectOptions(countries.countries)
+                      : []
+                  }
+                  isLoading={isCountriesLoading}
                 />
               </HookFormItem>
               <HookFormItem name="agencies" label="Agency">
                 <MultiSelect
-                  options={agenciesMockData}
-                  // options={
-                  //   agencies?.agencies
-                  //     ? formatSelectOptions(agencies.agencies)
-                  //     : []
-                  // }
-                  // isLoading={isAgenciesLoading}
+                  options={
+                    agencies?.agencies
+                      ? formatSelectOptions(agencies.agencies)
+                      : []
+                  }
+                  isLoading={isAgenciesLoading}
                 />
               </HookFormItem>
               <HookFormItem name="drugs" label="Drug Name">
                 <MultiSelect
-                  options={drugsMockData}
-                  // options={drugs?.drugs ? formatSelectOptions(drugs.drugs) : []}
-                  // isLoading={isDrugsLoading}
+                  options={drugs?.drugs ? formatSelectOptions(drugs.drugs) : []}
+                  isLoading={isDrugsLoading}
                 />
               </HookFormItem>
               <HookFormItem name="biomarkers" label="Biomarkers">
                 <MultiSelect
-                  options={biomarkersMockData}
-                  // options={
-                  //   biomarkers?.biomarkers
-                  //     ? formatSelectOptions(biomarkers.biomarkers)
-                  //     : []
-                  // }
-                  // isLoading={isBiomarkersLoading}
+                  options={
+                    biomarkers?.biomarkers
+                      ? formatSelectOptions(biomarkers.biomarkers)
+                      : []
+                  }
+                  isLoading={isBiomarkersLoading}
                 />
               </HookFormItem>
               <HookFormItem name="modalities" label="Treatment Modality">
                 <MultiSelect
-                  options={modalitiesMockData}
-                  // options={
-                  //   modalities?.modalities
-                  //     ? formatSelectOptions(modalities.modalities)
-                  //     : []
-                  // }
-                  // isLoading={isModalitiesLoading}
+                  options={
+                    modalities?.modalities
+                      ? formatSelectOptions(modalities.modalities)
+                      : []
+                  }
+                  isLoading={isModalitiesLoading}
                 />
               </HookFormItem>
               <HookFormItem name="diseases" label="Primary Disease">
                 <MultiSelect
-                  options={diseasesMockData}
-                  // options={
-                  //   diseases?.diseases
-                  //     ? formatSelectOptions(diseases.diseases)
-                  //     : []
-                  // }
-                  // isLoading={isDiseasesLoading}
+                  options={
+                    diseases?.diseases
+                      ? formatSelectOptions(diseases.diseases)
+                      : []
+                  }
+                  isLoading={isDiseasesLoading}
                 />
               </HookFormItem>
               <HookFormItem
@@ -136,13 +170,14 @@ const FilterConfigController = () => {
                 label="Final Recommendations"
               >
                 <MultiSelect
-                  options={finalRecommendationsMockData}
-                  // options={
-                  //   recommendations?.recommendations
-                  //     ? formatSelectOptions(recommendations.recommendations)
-                  //     : []
-                  // }
-                  // isLoading={isRecommendationsLoading}
+                  options={
+                    recommendations?.final_recommendations
+                      ? formatSelectOptions(
+                          recommendations.final_recommendations
+                        )
+                      : []
+                  }
+                  isLoading={isRecommendationsLoading}
                 />
               </HookFormItem>
             </form>
@@ -154,6 +189,7 @@ const FilterConfigController = () => {
               className="w-full"
               size="lg"
               form="apply-filters"
+              loading={isFetching}
             >
               Apply Filters
             </Button>

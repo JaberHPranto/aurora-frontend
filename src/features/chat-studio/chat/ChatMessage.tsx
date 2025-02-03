@@ -1,3 +1,4 @@
+import MarkdownContent from "@/components/shared/MarkdownContent";
 import { Button } from "@/components/ui/button";
 import { Bot, Copy, RefreshCcw, ThumbsDown, User } from "lucide-react";
 import { useState } from "react";
@@ -50,9 +51,10 @@ export function ChatMessage({ sender, content }: ChatMessageProps) {
         </div>
         <div className="flex-1 space-y-1.5">
           <div className="relative rounded-2xl bg-gradient-to-r from-primary-100/80 from-[30%] to-primary-50 p-4 shadow-sm border border-gray-200 max-w-[80%]">
-            <p className="text-sm leading-6 text-slate-800 whitespace-pre-wrap">
+            {/* <p className="text-sm leading-6 text-slate-800 whitespace-pre-wrap">
               {content}
-            </p>
+            </p> */}
+            <MarkdownContent>{content}</MarkdownContent>
           </div>
           <div className="flex items-center gap-1.5">
             <Button

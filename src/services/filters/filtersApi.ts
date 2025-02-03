@@ -27,11 +27,18 @@ export const filtersApi = apiSlice.injectEndpoints({
       providesTags: ["diseases"],
     }),
     getAvailableFinalRecommendations: builder.query<
-      { recommendations: string[] },
+      { final_recommendations: string[] },
       void
     >({
-      query: () => `/filters/recommendations`,
+      query: () => `/filters/final_recommendations`,
       providesTags: ["final_recommendations"],
+    }),
+    getFilterIds: builder.query<any, string>({
+      query: (url: string) => {
+        return {
+          url: `/filters/get_ids?${url}`,
+        };
+      },
     }),
   }),
 });
@@ -44,4 +51,5 @@ export const {
   useGetAvailableModalitiesQuery,
   useGetAvailableDiseasesQuery,
   useGetAvailableFinalRecommendationsQuery,
+  useGetFilterIdsQuery,
 } = filtersApi;

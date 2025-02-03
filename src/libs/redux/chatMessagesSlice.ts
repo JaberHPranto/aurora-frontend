@@ -8,10 +8,16 @@ export interface Message {
 
 interface ChatState {
   messages: Message[];
+  filterIds: {
+    ids: string[];
+  };
 }
 
 const initialState: ChatState = {
   messages: [],
+  filterIds: {
+    ids: [],
+  },
 };
 
 const chatMessagesSlice = createSlice({
@@ -49,6 +55,10 @@ const chatMessagesSlice = createSlice({
     clearMessages: (state) => {
       state.messages = [];
     },
+
+    setFilterIds: (state, action: PayloadAction<{ ids: string[] }>) => {
+      state.filterIds = action.payload;
+    },
   },
 });
 
@@ -59,9 +69,13 @@ export const {
   updateMessage,
   deleteMessage,
   clearMessages,
+  setFilterIds,
 } = chatMessagesSlice.actions;
 
 export const selectAllMessages = (state: { chatMessages: ChatState }) =>
   state.chatMessages.messages;
+
+export const selectAllFilterIds = (state: { chatMessages: ChatState }) =>
+  state.chatMessages.filterIds;
 
 export default chatMessagesSlice.reducer;
