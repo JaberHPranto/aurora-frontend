@@ -16,7 +16,7 @@ function MarkdownContent({ children }: Props) {
             />
           ),
           h2: ({ node, ...props }) => (
-            <h2 className="text-3xl font-bold mb-4 text-blue-800" {...props} />
+            <h2 className="text-3xl font-bold mb-4 text-blue-600" {...props} />
           ),
           h3: ({ node, ...props }) => (
             <h3
@@ -31,10 +31,10 @@ function MarkdownContent({ children }: Props) {
             />
           ),
           ul: ({ node, ...props }) => (
-            <ul className="list-none mb-4 space-y-2" {...props} />
+            <ul className="list-none mb-4 space-y-2 text-gray-700" {...props} />
           ),
           ol: ({ node, ...props }) => (
-            <ol className="list-none mb-4 space-y-2" {...props} />
+            <ol className="list-none mb-4 space-y-2 text-gray-700" {...props} />
           ),
           li: ({ node, ...props }) => (
             <li className="flex items-start">

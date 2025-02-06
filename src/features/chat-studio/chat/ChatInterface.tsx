@@ -1,26 +1,24 @@
 import { AutosizeTextarea } from "@/components/ui/autosize-textarea";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import useStreamResponseForChat from "@/hooks/useStreamingResponse";
 import { cn } from "@/libs/utils";
 import { Bot, PanelLeftClose, PanelRightClose, Send } from "lucide-react";
-import { ChatMessage } from "./ChatMessage";
-import {
-  addMessage,
-  Message,
-  selectAllFilterIds,
-  selectAllMessages,
-} from "@/libs/redux/chatMessagesSlice";
-import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useRef, useState } from "react";
+import { useDispatch } from "react-redux";
+import { ChatMessage } from "./ChatMessage";
 import TypingLoader from "@/components/shared/TypingLoadder";
-import { useAddQueryMutation } from "@/services/chatApi";
-import { toast } from "sonner";
 
 interface Props {
   isLeftPanelOpen: boolean;
   isRightPanelOpen: boolean;
   setIsLeftPanelOpen: (open: boolean) => void;
   setIsRightPanelOpen: (open: boolean) => void;
+}
+
+export interface ChatMessageType {
+  content: string;
+  sender: "user" | "assistant";
 }
 
 const ChatInterface = ({
@@ -31,10 +29,11 @@ const ChatInterface = ({
 }: Props) => {
   const dispatch = useDispatch();
 
-  const chatMessages = useSelector(selectAllMessages);
-  const filterIds = useSelector(selectAllFilterIds);
+  const [messages, setMessages] = useState<ChatMessageType[]>([]);
 
-  const [addQuery, { isLoading }] = useAddQueryMutation();
+  const { runQuery, isLoading } = useStreamResponseForChat({ setMessages });
+  console.log("🚀 ~ isLoading:", isLoading);
+  // const [addQuery, { isLoading }] = useAddQueryMutation();
 
   const [inputText, setInputText] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -45,38 +44,40 @@ const ChatInterface = ({
 
   useEffect(() => {
     scrollToBottom();
-  }, [chatMessages]);
+  }, [messages]);
 
   const handleMessageSubmit = () => {
-    const newMessage: Message = {
-      id: Date.now().toString(),
+    const newMessage: ChatMessageType = {
       content: inputText,
       sender: "user",
     };
 
     setInputText("");
-    dispatch(addMessage(newMessage));
+    setMessages((prev) => [...prev, newMessage]);
 
-    addQuery({ query: inputText, filtered_ids: filterIds?.ids ?? [] })
-      .unwrap()
-      .then((response: string) => {
-        console.log("response", response);
-        dispatch(
-          addMessage({
-            id: Date.now().toString(),
-            content: response,
-            sender: "assistant",
-          })
-        );
-      })
-      .catch(() => toast.error("Something went wrong"));
+    runQuery(inputText);
   };
+
+  //   addQuery({ query: inputText, filtered_ids: filterIds?.ids ?? [] })
+  //     .unwrap()
+  //     .then((response: string) => {
+  //       console.log("response", response);
+  //       dispatch(
+  //         addMessage({
+  //           id: Date.now().toString(),
+  //           content: response,
+  //           sender: "assistant",
+  //         })
+  //       );
+  //     })
+  //     .catch(() => toast.error("Something went wrong"));
+  // };
 
   return (
     <>
       <div className="flex flex-col h-full bg-gradient-to-b from-white from-[75%] to-primary-50 relative">
         {/* Empty Chat Screen */}
-        {chatMessages.length === 0 && (
+        {messages.length === 0 && (
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
             <div className="flex flex-col items-center justify-center gap-3">
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary-400 to-primary-600">
@@ -127,14 +128,14 @@ const ChatInterface = ({
         </div>
 
         <ScrollArea className="flex-1 p-6">
-          {chatMessages.map((message) => (
+          {messages.map((message, index) => (
             <ChatMessage
-              key={message.id}
+              key={index}
               content={message.content}
               sender={message.sender}
             />
           ))}
-          {chatMessages.length > 0 && isLoading && (
+          {messages.length > 0 && isLoading && (
             <div className="mb-4 text-left">
               <div className="flex w-fit items-center gap-2 rounded-lg bg-secondary px-2 h-11 text-secondary-foreground">
                 <TypingLoader />

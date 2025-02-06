@@ -11,7 +11,19 @@ export const chatApi = apiSlice.injectEndpoints({
         };
       },
     }),
+    addSteamingQuery: builder.mutation<
+      any,
+      { query: string; filtered_ids: string[] }
+    >({
+      query: (data) => {
+        return {
+          url: "/chat/stream",
+          method: "POST",
+          body: data,
+        };
+      },
+    }),
   }),
 });
 
-export const { useAddQueryMutation } = chatApi;
+export const { useAddQueryMutation, useAddSteamingQueryMutation } = chatApi;
