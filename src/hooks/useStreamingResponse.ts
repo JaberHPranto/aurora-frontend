@@ -1,5 +1,5 @@
 import { ChatMessageType } from "@/features/chat-studio/chat/ChatInterface";
-import { Message, selectAllFilterIds } from "@/libs/redux/chatMessagesSlice";
+import { selectAllFilterIds } from "@/libs/redux/chatMessagesSlice";
 import { useState } from "react";
 import { useSelector } from "react-redux";
 
@@ -9,9 +9,10 @@ function useStreamResponseForChat({
   setMessages: React.Dispatch<React.SetStateAction<ChatMessageType[]>>;
 }) {
   // const [responses, setResponses] = useState("")
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [data, setData] = useState<any>();
   const [isLoading, setIsLoading] = useState(true);
-  const [buffer, setBuffer] = useState("");
+  // const [buffer, setBuffer] = useState("");
 
   const filterIds = useSelector(selectAllFilterIds);
 
