@@ -1,3 +1,4 @@
+import TypingLoader from "@/components/shared/TypingLoadder";
 import { AutosizeTextarea } from "@/components/ui/autosize-textarea";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -5,9 +6,7 @@ import useStreamResponseForChat from "@/hooks/useStreamingResponse";
 import { cn } from "@/libs/utils";
 import { Bot, PanelLeftClose, PanelRightClose, Send } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-// import { useDispatch } from "react-redux";
 import { ChatMessage } from "./ChatMessage";
-import TypingLoader from "@/components/shared/TypingLoadder";
 
 interface Props {
   isLeftPanelOpen: boolean;
@@ -27,12 +26,9 @@ const ChatInterface = ({
   setIsLeftPanelOpen,
   setIsRightPanelOpen,
 }: Props) => {
-  // const dispatch = useDispatch();
-
   const [messages, setMessages] = useState<ChatMessageType[]>([]);
 
   const { runQuery, isLoading } = useStreamResponseForChat({ setMessages });
-  console.log("🚀 ~ isLoading:", isLoading);
   // const [addQuery, { isLoading }] = useAddQueryMutation();
 
   const [inputText, setInputText] = useState("");

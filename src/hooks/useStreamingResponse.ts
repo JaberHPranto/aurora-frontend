@@ -8,11 +8,8 @@ function useStreamResponseForChat({
 }: {
   setMessages: React.Dispatch<React.SetStateAction<ChatMessageType[]>>;
 }) {
-  // const [responses, setResponses] = useState("")
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [data, setData] = useState<any>();
   const [isLoading, setIsLoading] = useState(true);
-  // const [buffer, setBuffer] = useState("");
 
   const filterIds = useSelector(selectAllFilterIds);
 
@@ -52,9 +49,6 @@ function useStreamResponseForChat({
       if (text.includes("COMPLETED _ END OF STREAM _ FINAL RESULT")) {
         setData(text.replace(/.*COMPLETED _ END OF STREAM _ FINAL RESULT/, ""));
       } else {
-        // the text will start with <<GGWWP>> and if multiple <<GGWWP>> is there, it will be split by <<GGWWP>>
-        // also remove the <<GGWWP>> prefix
-
         setMessages((prev) => {
           const newMessages = [...prev];
           const lastMessage = newMessages[newMessages.length - 1];
