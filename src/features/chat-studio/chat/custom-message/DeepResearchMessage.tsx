@@ -1,36 +1,94 @@
 "use client";
 
+import MarkdownContent from "@/components/shared/MarkdownContent";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { cn } from "@/libs/utils";
+import {
+  DeepResearchMessage,
+  ResearchMessage,
+  ThinkMessage,
+} from "@/types/deep-research";
 import { parseJsonl } from "@/utils/helpers";
-import { FileText, HelpCircle, Search } from "lucide-react";
+import { Brain, FileText, HelpCircle, Loader, Search } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 
 interface Props {
   content: string;
 }
 
-export default function ResearchAgent({ content }: Props) {
-  const researchContent = parseJsonl(content);
+export default function DeepResearchAgent({ content }: Props) {
+  const [openAccordionId, setOpenAccordionId] = useState<string>();
+  const [prevMessageCount, setPrevMessageCount] = useState(0);
+
+  const researchContent = parseJsonl(content) as DeepResearchMessage[];
+
+  const rewriteMessage = researchContent.find((msg) => msg.type === "rewrite");
+  const finalAnswer = researchContent.find((msg) => msg.type === "final");
+  const isResearchCompleted = researchContent.find(
+    (msg) => msg.type === "completed_research"
+  );
+
+  // Group think and research messages by id
+  const groupedMessages = useMemo(
+    () =>
+      researchContent.reduce(
+        (acc, msg) => {
+          if (msg.type === "think") {
+            const id = (msg.value as { id: number }).id;
+            if (!acc[id]) {
+              acc[id] = { think: null, research: null };
+            }
+            acc[id].think = msg;
+          } else if (msg.type === "research") {
+            const id = (msg.value as { id: number }).id;
+            if (!acc[id]) {
+              acc[id] = { think: null, research: null };
+            }
+            acc[id].research = msg;
+          }
+          return acc;
+        },
+        {} as Record<
+          number,
+          {
+            think: (DeepResearchMessage & ThinkMessage) | null;
+            research: (DeepResearchMessage & ResearchMessage) | null;
+          }
+        >
+      ),
+    [researchContent]
+  );
+
+  useEffect(() => {
+    const messageIds = Object.keys(groupedMessages);
+    const currentCount = messageIds.length;
+
+    if (currentCount > prevMessageCount) {
+      // New message has arrived
+      const lastId = messageIds[currentCount - 1];
+      setOpenAccordionId(`item-${lastId}`);
+      setPrevMessageCount(currentCount);
+    }
+  }, [groupedMessages, prevMessageCount]);
 
   return (
     <div className="p-3">
       <div className=" space-y-6">
         <h1 className="text-2xl font-semibold leading-tight text-gray-800">
-          I want to do a deep research on why the HTA Submission fails and
-          generate a report.
+          {rewriteMessage?.value?.rewritten_query || "Deep Research"}
         </h1>
 
         <Card>
           <Accordion type="single" collapsible defaultValue="research">
             <AccordionItem value="research" className="border-none">
               <CardHeader className="pb-0">
-                <AccordionTrigger className="hover:no-underline">
+                <AccordionTrigger className="hover:no-underline pt-0 pb-5">
                   <div className="flex items-center justify-between w-full">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-md bg-blue-100 text-blue-600 flex items-center justify-center flex-shrink-0">
@@ -40,7 +98,7 @@ export default function ResearchAgent({ content }: Props) {
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-sm text-gray-500 mr-3">
-                        2 research points
+                        {Object.keys(groupedMessages).length} research points
                       </span>
                     </div>
                   </div>
@@ -48,14 +106,16 @@ export default function ResearchAgent({ content }: Props) {
               </CardHeader>
               <AccordionContent>
                 <CardContent className="pt-4 space-y-3">
-                  {[1, 2, 3].map((item) => (
-                    <div className="relative pl-4">
+                  {Object.entries(groupedMessages).map(([id, messages]) => (
+                    <div key={id} className="relative pl-4">
                       {/* Timeline line */}
                       <div
                         className={cn(
                           "absolute left-[5px] top-2 -bottom-5 w-[2px] bg-blue-200",
                           {
-                            "bottom-[2px]": item === 3,
+                            "bottom-[2px]":
+                              Number(id) ===
+                              Object.keys(groupedMessages).length - 1,
                           }
                         )}
                       />
@@ -63,21 +123,22 @@ export default function ResearchAgent({ content }: Props) {
                       <div className="space-y-8">
                         <div className="relative">
                           {/* Timeline dot */}
-                          <div className="absolute -left-[16px] top-[6px] w-[12px] h-[12px] rounded-full bg-blue-500 ring-4 ring-blue-50" />
+                          <div className="absolute -left-[16px] top-[6px] w-3 h-3 min-w-3 min-h-3 rounded-full bg-blue-500 ring-4 ring-blue-50" />
                           <div className="pl-6">
-                            <Accordion type="single" collapsible>
+                            <Accordion
+                              type="single"
+                              collapsible
+                              value={openAccordionId}
+                              onValueChange={setOpenAccordionId}
+                            >
                               <AccordionItem
-                                value="item-0"
+                                value={`item-${id}`}
                                 className="border-none"
                               >
                                 <AccordionTrigger className="hover:no-underline p-0 [&[data-state=open]>p]:line-clamp-none">
                                   <p className="text-base text-muted-foreground text-left line-clamp-1">
-                                    The question about why HTA submissions fail
-                                    is not fully addressed by the information
-                                    provided. Further research into the common
-                                    reasons for failure, as well as strategies
-                                    to prevent such failures, would be
-                                    beneficial.
+                                    {messages.think?.value.thought ||
+                                      "Thinking..."}
                                   </p>
                                 </AccordionTrigger>
                                 <AccordionContent className="pt-4 space-y-6">
@@ -93,43 +154,36 @@ export default function ResearchAgent({ content }: Props) {
                                       <div className="bg-blue-50 border border-blue-100 rounded-lg px-4 py-3 text-gray-800 leading-6">
                                         <div className="flex gap-3">
                                           <p>
-                                            What are the common reasons for HTA
-                                            submission failures and how can
-                                            these be mitigated to increase the
-                                            success rate?
+                                            {messages.research?.value
+                                              .research_question ||
+                                              "Researching..."}
                                           </p>
                                         </div>
                                       </div>
                                     </div>
 
-                                    {/* Research Results Section */}
-                                    <div className="space-y-2">
-                                      <div className="flex items-center gap-2 text-gray-700">
-                                        <FileText className="w-[18px] h-[18px] text-blue-500" />
-                                        <h4 className="font-medium text-base">
-                                          Research Results
-                                        </h4>
-                                      </div>
+                                    {/* Research Outcome Section */}
+                                    {messages.research && (
+                                      <div className="space-y-2">
+                                        <div className="flex items-center gap-2 text-gray-700">
+                                          <FileText className="w-[18px] h-[18px] text-blue-500" />
+                                          <h4 className="font-medium text-base">
+                                            Research Outcome
+                                          </h4>
+                                        </div>
 
-                                      <div className="gap-4">
-                                        <div className="bg-gray-100 leading-6 rounded-lg p-4 border border-gray-100 transition-all hover:shadow-sm text-gray-700">
-                                          <p>
-                                            Specific case studies, such as those
-                                            involving drugs like Enhertu,
-                                            Nerlynx, and Trodelvy, illustrate
-                                            common reasons for HTA submission
-                                            failures. These include incomplete
-                                            or inappropriate comparator data,
-                                            high risk of bias in study
-                                            endpoints, lack of robust real-world
-                                            evidence, insufficient subgroup
-                                            analyses, and failure to meet
-                                            regulatory or guideline-specific
-                                            requirements.
-                                          </p>
+                                        <div className="gap-4">
+                                          <div className="bg-gray-100 leading-6 rounded-lg p-4 border border-gray-100 transition-all hover:shadow-sm text-gray-700">
+                                            <p>
+                                              {
+                                                messages.research.value
+                                                  .research_result
+                                              }
+                                            </p>
+                                          </div>
                                         </div>
                                       </div>
-                                    </div>
+                                    )}
                                   </div>
                                 </AccordionContent>
                               </AccordionItem>
@@ -144,73 +198,40 @@ export default function ResearchAgent({ content }: Props) {
             </AccordionItem>
           </Accordion>
         </Card>
-
-        {/* Final Report Section */}
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-md bg-blue-100 text-blue-600 flex items-center justify-center flex-shrink-0">
-                  <FileText className="w-5 h-5" />
-                </div>
-                <h2 className="text-lg font-medium">Final Report</h2>
-              </div>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4 text-gray-700">
-              <p>
-                Based on the provided context and previous research outcomes,
-                HTA submission failures commonly occur due to the following
-                reasons:
-              </p>
-              <div className="space-y-4">
-                <div>
-                  <h3 className="font-medium text-gray-900 mb-2">
-                    1. Uncertainty in Evidence
-                  </h3>
-                  <p>
-                    Immature or limited clinical trial data, lack of comparative
-                    evidence, and insufficient subgroup analyses.
-                  </p>
-                  <p className="mt-1">
-                    <strong>Mitigation:</strong> Strengthen trial designs with
-                    mature, head-to-head comparative data and robust subgroup
-                    analyses.
-                  </p>
+        <div>
+          {isResearchCompleted ? (
+            finalAnswer?.value?.final_answer ? (
+              <div>
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-8 h-8 rounded-md bg-blue-100 text-blue-600 flex items-center justify-center flex-shrink-0">
+                    <Brain className="w-5 h-5" />
+                  </div>
+                  <h2 className="text-lg font-medium">Final Answer</h2>
                 </div>
                 <div>
-                  <h3 className="font-medium text-gray-900 mb-2">
-                    2. Cost-Effectiveness Concerns
-                  </h3>
-                  <p>
-                    ICER values exceeding acceptable thresholds due to limited
-                    or uncertain benefits relative to costs.
-                  </p>
-                  <p className="mt-1">
-                    <strong>Mitigation:</strong> Align economic models with
-                    payer expectations, incorporate RWE, and address long-term
-                    outcomes.
-                  </p>
-                </div>
-                <div>
-                  <h3 className="font-medium text-gray-900 mb-2">
-                    3. Insufficient Real-World Evidence (RWE)
-                  </h3>
-                  <p>
-                    Lack of RWE to support clinical trial findings, which
-                    weakens submissions.
-                  </p>
-                  <p className="mt-1">
-                    <strong>Mitigation:</strong> Generate and integrate RWE to
-                    bridge gaps in applicability and support cost-effectiveness
-                    claims.
-                  </p>
+                  <MarkdownContent>
+                    {finalAnswer.value.final_answer}
+                  </MarkdownContent>
                 </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            ) : (
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <Loader className="text-gray-600 animate-spin w-4.5 h-4.5" />
+                  <p className="font-medium text-gray-600">
+                    Generating final answer ...
+                  </p>
+                </div>
+                {[...Array(5)].map((_, index) => (
+                  <div
+                    key={index}
+                    className="h-5 w-full bg-gray-300 animate-pulse "
+                  />
+                ))}
+              </div>
+            )
+          ) : null}
+        </div>
       </div>
     </div>
   );

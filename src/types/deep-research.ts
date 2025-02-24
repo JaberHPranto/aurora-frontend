@@ -3,14 +3,14 @@ interface BaseMessage {
   value: unknown;
 }
 
-interface RewriteMessage extends BaseMessage {
+export interface RewriteMessage extends BaseMessage {
   type: "rewrite";
   value: {
     rewritten_query: string;
   };
 }
 
-interface ThinkMessage extends BaseMessage {
+export interface ThinkMessage extends BaseMessage {
   type: "think";
   value: {
     id: number;
@@ -18,7 +18,7 @@ interface ThinkMessage extends BaseMessage {
   };
 }
 
-interface ResearchMessage extends BaseMessage {
+export interface ResearchMessage extends BaseMessage {
   type: "research";
   value: {
     id: number;
@@ -27,14 +27,14 @@ interface ResearchMessage extends BaseMessage {
   };
 }
 
-interface CompletedResearchMessage extends BaseMessage {
+export interface CompletedResearchMessage extends BaseMessage {
   type: "completed_research";
   value: {
     reason: string;
   };
 }
 
-interface FinalMessage extends BaseMessage {
+export interface FinalMessage extends BaseMessage {
   type: "final";
   value: {
     final_answer: string;

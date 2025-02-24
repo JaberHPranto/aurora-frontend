@@ -24,6 +24,14 @@ function MarkdownContent({ children }: Props) {
               {...props}
             />
           ),
+          h4: ({ node, ...props }) => (
+            <h4
+              className="text-2xl font-semibold mb-3 text-primary-700"
+              {...props}
+            />
+          ),
+          hr: ({ node, ...props }) => <hr className="opacity-0" {...props} />,
+
           p: ({ node, ...props }) => (
             <p
               className="mb-4 leading-7 text-gray-700 custom-paragraph"
