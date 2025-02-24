@@ -47,3 +47,11 @@ export type DeepResearchMessage =
   | ResearchMessage
   | CompletedResearchMessage
   | FinalMessage;
+
+export type DeepResearchGroup = Record<
+  number,
+  {
+    think: (DeepResearchMessage & ThinkMessage) | null;
+    research: (DeepResearchMessage & ResearchMessage) | null;
+  }
+>;

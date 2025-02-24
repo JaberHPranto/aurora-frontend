@@ -1,22 +1,16 @@
-"use client";
-
-import MarkdownContent from "@/components/shared/MarkdownContent";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { cn } from "@/libs/utils";
-import {
-  DeepResearchMessage,
-  ResearchMessage,
-  ThinkMessage,
-} from "@/types/deep-research";
-import { parseJsonl } from "@/utils/helpers";
-import { Brain, FileText, HelpCircle, Loader, Search } from "lucide-react";
+import { Card, CardHeader } from "@/components/ui/card";
+import { DeepResearchMessage } from "@/types/deep-research";
+import { groupMessagesByID, parseJsonl } from "@/utils/helpers";
+import { Search } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import FinalAnswerSection from "./components/FinalAnswerSection";
+import ResearchContent from "./components/ResearchContent";
 
 interface Props {
   content: string;
@@ -28,42 +22,18 @@ export default function DeepResearchAgent({ content }: Props) {
 
   const researchContent = parseJsonl(content) as DeepResearchMessage[];
 
-  const rewriteMessage = researchContent.find((msg) => msg.type === "rewrite");
-  const finalAnswer = researchContent.find((msg) => msg.type === "final");
-  const isResearchCompleted = researchContent.find(
-    (msg) => msg.type === "completed_research"
-  );
-
-  // Group think and research messages by id
-  const groupedMessages = useMemo(
-    () =>
-      researchContent.reduce(
-        (acc, msg) => {
-          if (msg.type === "think") {
-            const id = (msg.value as { id: number }).id;
-            if (!acc[id]) {
-              acc[id] = { think: null, research: null };
-            }
-            acc[id].think = msg;
-          } else if (msg.type === "research") {
-            const id = (msg.value as { id: number }).id;
-            if (!acc[id]) {
-              acc[id] = { think: null, research: null };
-            }
-            acc[id].research = msg;
-          }
-          return acc;
-        },
-        {} as Record<
-          number,
-          {
-            think: (DeepResearchMessage & ThinkMessage) | null;
-            research: (DeepResearchMessage & ResearchMessage) | null;
-          }
-        >
-      ),
-    [researchContent]
-  );
+  const { rewriteMessage, finalAnswer, isResearchCompleted, groupedMessages } =
+    useMemo(
+      () => ({
+        rewriteMessage: researchContent.find((msg) => msg.type === "rewrite"),
+        finalAnswer: researchContent.find((msg) => msg.type === "final"),
+        isResearchCompleted: researchContent.find(
+          (msg) => msg.type === "completed_research"
+        ),
+        groupedMessages: groupMessagesByID(researchContent),
+      }),
+      [researchContent]
+    );
 
   useEffect(() => {
     const messageIds = Object.keys(groupedMessages);
@@ -104,134 +74,24 @@ export default function DeepResearchAgent({ content }: Props) {
                   </div>
                 </AccordionTrigger>
               </CardHeader>
+
+              {/* Research Content */}
               <AccordionContent>
-                <CardContent className="pt-4 space-y-3">
-                  {Object.entries(groupedMessages).map(([id, messages]) => (
-                    <div key={id} className="relative pl-4">
-                      {/* Timeline line */}
-                      <div
-                        className={cn(
-                          "absolute left-[5px] top-2 -bottom-5 w-[2px] bg-blue-200",
-                          {
-                            "bottom-[2px]":
-                              Number(id) ===
-                              Object.keys(groupedMessages).length - 1,
-                          }
-                        )}
-                      />
-
-                      <div className="space-y-8">
-                        <div className="relative">
-                          {/* Timeline dot */}
-                          <div className="absolute -left-[16px] top-[6px] w-3 h-3 min-w-3 min-h-3 rounded-full bg-blue-500 ring-4 ring-blue-50" />
-                          <div className="pl-6">
-                            <Accordion
-                              type="single"
-                              collapsible
-                              value={openAccordionId}
-                              onValueChange={setOpenAccordionId}
-                            >
-                              <AccordionItem
-                                value={`item-${id}`}
-                                className="border-none"
-                              >
-                                <AccordionTrigger className="hover:no-underline p-0 [&[data-state=open]>p]:line-clamp-none">
-                                  <p className="text-base text-muted-foreground text-left line-clamp-1">
-                                    {messages.think?.value.thought ||
-                                      "Thinking..."}
-                                  </p>
-                                </AccordionTrigger>
-                                <AccordionContent className="pt-4 space-y-6">
-                                  <div className="text-gray-600 space-y-6">
-                                    {/* Research Question Section */}
-                                    <div className="space-y-2">
-                                      <div className="flex items-center gap-2 text-gray-700">
-                                        <HelpCircle className="w-[18px] h-[18px] text-blue-500" />
-                                        <h4 className="font-medium text-base">
-                                          Research Question
-                                        </h4>
-                                      </div>
-                                      <div className="bg-blue-50 border border-blue-100 rounded-lg px-4 py-3 text-gray-800 leading-6">
-                                        <div className="flex gap-3">
-                                          <p>
-                                            {messages.research?.value
-                                              .research_question ||
-                                              "Researching..."}
-                                          </p>
-                                        </div>
-                                      </div>
-                                    </div>
-
-                                    {/* Research Outcome Section */}
-                                    {messages.research && (
-                                      <div className="space-y-2">
-                                        <div className="flex items-center gap-2 text-gray-700">
-                                          <FileText className="w-[18px] h-[18px] text-blue-500" />
-                                          <h4 className="font-medium text-base">
-                                            Research Outcome
-                                          </h4>
-                                        </div>
-
-                                        <div className="gap-4">
-                                          <div className="bg-gray-100 leading-6 rounded-lg p-4 border border-gray-100 transition-all hover:shadow-sm text-gray-700">
-                                            <p>
-                                              {
-                                                messages.research.value
-                                                  .research_result
-                                              }
-                                            </p>
-                                          </div>
-                                        </div>
-                                      </div>
-                                    )}
-                                  </div>
-                                </AccordionContent>
-                              </AccordionItem>
-                            </Accordion>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </CardContent>
+                <ResearchContent
+                  groupedMessages={groupedMessages}
+                  openAccordionId={openAccordionId}
+                  setOpenAccordionId={setOpenAccordionId}
+                />
               </AccordionContent>
             </AccordionItem>
           </Accordion>
         </Card>
-        <div>
-          {isResearchCompleted ? (
-            finalAnswer?.value?.final_answer ? (
-              <div>
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="w-8 h-8 rounded-md bg-blue-100 text-blue-600 flex items-center justify-center flex-shrink-0">
-                    <Brain className="w-5 h-5" />
-                  </div>
-                  <h2 className="text-lg font-medium">Final Answer</h2>
-                </div>
-                <div>
-                  <MarkdownContent>
-                    {finalAnswer.value.final_answer}
-                  </MarkdownContent>
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <Loader className="text-gray-600 animate-spin w-4.5 h-4.5" />
-                  <p className="font-medium text-gray-600">
-                    Generating final answer ...
-                  </p>
-                </div>
-                {[...Array(5)].map((_, index) => (
-                  <div
-                    key={index}
-                    className="h-5 w-full bg-gray-300 animate-pulse "
-                  />
-                ))}
-              </div>
-            )
-          ) : null}
-        </div>
+
+        {/* Final Answer */}
+        <FinalAnswerSection
+          isResearchCompleted={Boolean(isResearchCompleted)}
+          finalAnswer={finalAnswer}
+        />
       </div>
     </div>
   );
