@@ -14,7 +14,7 @@ function useStreamResponseForChat({
   const filterIds = useSelector(selectAllFilterIds);
 
   async function runQuery(queryContent: string) {
-    const response = await fetch(process.env.API_URL + "/chat/stream", {
+    const response = await fetch(process.env.API_URL + "/chat/deep_think", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -62,6 +62,7 @@ function useStreamResponseForChat({
             newMessages.push({
               content: text,
               sender: "assistant",
+              type: "deep-research",
             });
           }
 
@@ -87,6 +88,7 @@ function useStreamResponseForChat({
         // setResponses((prev) => prev + text)
         // streamCallback((prevValue) => [...prevValue, text])
       }
+
       read();
     }
     read();

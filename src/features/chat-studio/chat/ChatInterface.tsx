@@ -18,6 +18,7 @@ interface Props {
 export interface ChatMessageType {
   content: string;
   sender: "user" | "assistant";
+  type: "text" | "deep-research";
 }
 
 const ChatInterface = ({
@@ -46,6 +47,7 @@ const ChatInterface = ({
     const newMessage: ChatMessageType = {
       content: inputText,
       sender: "user",
+      type: "text",
     };
 
     setInputText("");
@@ -53,21 +55,6 @@ const ChatInterface = ({
 
     runQuery(inputText);
   };
-
-  //   addQuery({ query: inputText, filtered_ids: filterIds?.ids ?? [] })
-  //     .unwrap()
-  //     .then((response: string) => {
-  //       console.log("response", response);
-  //       dispatch(
-  //         addMessage({
-  //           id: Date.now().toString(),
-  //           content: response,
-  //           sender: "assistant",
-  //         })
-  //       );
-  //     })
-  //     .catch(() => toast.error("Something went wrong"));
-  // };
 
   return (
     <>
@@ -129,15 +116,16 @@ const ChatInterface = ({
               key={index}
               content={message.content}
               sender={message.sender}
+              type={message.type}
             />
           ))}
-          {messages.length > 0 && isLoading && (
+          {/* {messages.length > 0 && isLoading && (
             <div className="mb-4 text-left">
               <div className="flex w-fit items-center gap-2 rounded-lg bg-secondary px-2 h-11 text-secondary-foreground">
                 <TypingLoader />
               </div>
             </div>
-          )}
+          )} */}
           <div ref={messagesEndRef} />
         </ScrollArea>
         <footer className="rounded-t-xl pb-6">

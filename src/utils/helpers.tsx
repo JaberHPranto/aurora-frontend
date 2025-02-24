@@ -1,3 +1,5 @@
+import { DeepResearchMessage } from "@/types/deep-research";
+
 export const formatSelectOptions = (options: string[]) => {
   if (!options || options.length === 0) return [];
 
@@ -26,4 +28,26 @@ export function convertObjectToQueryString(
   }
 
   return queryParams.join("&");
+}
+
+export function parseJsonl(content: string): DeepResearchMessage[] {
+  const jsonStrings = content.split("---VIVA--SEPARATOR---");
+
+  const parsedData: DeepResearchMessage[] = [];
+
+  for (const jsonStr of jsonStrings) {
+    if (!jsonStr.trim()) {
+      continue;
+    }
+
+    try {
+      const data = JSON.parse(jsonStr.trim()) as DeepResearchMessage;
+      parsedData.push(data);
+    } catch (e) {
+      console.error("Error parsing JSON:", e);
+      continue;
+    }
+  }
+
+  return parsedData;
 }

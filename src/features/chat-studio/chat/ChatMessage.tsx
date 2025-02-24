@@ -3,13 +3,19 @@ import { Button } from "@/components/ui/button";
 import { Bot, Copy, RefreshCcw, ThumbsDown, User } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import DeepResearchMessage from "./custom-message/DeepResearchMessage";
 
 interface ChatMessageProps {
   sender: "user" | "assistant";
   content: string;
+  type: "text" | "deep-research";
 }
 
-export function ChatMessage({ sender, content }: ChatMessageProps) {
+export function ChatMessage({
+  sender,
+  content,
+  type = "text",
+}: ChatMessageProps) {
   const [isCopying, setIsCopying] = useState(false);
 
   const handleCopy = async () => {
@@ -41,6 +47,41 @@ export function ChatMessage({ sender, content }: ChatMessageProps) {
         </div>
       </div>
     );
+  } else if (sender === "assistant" && type === "deep-research") {
+    return (
+      <div className="flex-1 space-y-1.5">
+        <div className="relative rounded-2xl bg-gradient-to-r from-primary-100/80 from-[30%] to-primary-50 p-4 shadow-sm border border-gray-200 max-w-[80%]">
+          <DeepResearchMessage content={content} />
+        </div>
+        <div className="flex items-center gap-1.5">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 rounded-xl text-slate-500 hover:bg-primary-50 hover:text-primary-600"
+          >
+            <ThumbsDown className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 rounded-xl text-slate-500 hover:bg-primary-50 hover:text-primary-600"
+            onClick={handleCopy}
+            disabled={isCopying}
+          >
+            <Copy
+              className={`h-4 w-4 ${isCopying ? "text-primary-600" : ""}`}
+            />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 rounded-xl text-slate-500 hover:bg-primary-50 hover:text-primary-600"
+          >
+            <RefreshCcw className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -51,9 +92,6 @@ export function ChatMessage({ sender, content }: ChatMessageProps) {
         </div>
         <div className="flex-1 space-y-1.5">
           <div className="relative rounded-2xl bg-gradient-to-r from-primary-100/80 from-[30%] to-primary-50 p-4 shadow-sm border border-gray-200 max-w-[80%]">
-            {/* <p className="text-sm leading-6 text-slate-800 whitespace-pre-wrap">
-              {content}
-            </p> */}
             <MarkdownContent>{content}</MarkdownContent>
           </div>
           <div className="flex items-center gap-1.5">
