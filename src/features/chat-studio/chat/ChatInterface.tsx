@@ -4,7 +4,13 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import useStreamResponseForChat from "@/hooks/useStreamingResponse";
 import { cn } from "@/libs/utils";
-import { Bot, PanelLeftClose, PanelRightClose, Send } from "lucide-react";
+import {
+  Bot,
+  Brain,
+  PanelLeftClose,
+  PanelRightClose,
+  Send,
+} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { ChatMessage } from "./ChatMessage";
 
@@ -28,9 +34,12 @@ const ChatInterface = ({
   setIsRightPanelOpen,
 }: Props) => {
   const [messages, setMessages] = useState<ChatMessageType[]>([]);
+  const [isDeepResearchEnabled, setIsDeepResearchEnabled] = useState(false);
 
-  const { runQuery, isLoading } = useStreamResponseForChat({ setMessages });
-  // const [addQuery, { isLoading }] = useAddQueryMutation();
+  const { runQuery, isLoading } = useStreamResponseForChat({
+    setMessages,
+    isDeepResearchEnabled,
+  });
 
   const [inputText, setInputText] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -119,13 +128,13 @@ const ChatInterface = ({
               type={message.type}
             />
           ))}
-          {/* {messages.length > 0 && isLoading && (
+          {messages.length > 0 && isLoading && (
             <div className="mb-4 text-left">
               <div className="flex w-fit items-center gap-2 rounded-lg bg-secondary px-2 h-11 text-secondary-foreground">
                 <TypingLoader />
               </div>
             </div>
-          )} */}
+          )}
           <div ref={messagesEndRef} />
         </ScrollArea>
         <footer className="rounded-t-xl pb-6">
@@ -134,7 +143,7 @@ const ChatInterface = ({
               <div className="flex items-end justify-start  rounded-xl border border-input relative">
                 <AutosizeTextarea
                   placeholder="Ask Anything..."
-                  minHeight={80}
+                  minHeight={110}
                   maxHeight={240}
                   value={inputText}
                   onChange={(e) => setInputText(e.target.value)}
@@ -146,8 +155,24 @@ const ChatInterface = ({
                       }
                     }
                   }}
-                  className="min-h-[100px] select-none resize-none overflow-hidden overflow-y-auto rounded-b-none rounded-xl border-0 bg-white  focus-visible:ring-0 focus-visible:ring-offset-0 p-3 focus-visible:outline-primary-200"
+                  className="min-h-[110px] select-none resize-none overflow-hidden overflow-y-auto rounded-b-none rounded-xl border-0 bg-white  focus-visible:ring-0 focus-visible:ring-offset-0 px-3 pb-12 pt-3 focus-visible:outline-primary-200"
                 />
+                <Button
+                  type="submit"
+                  variant={"outline"}
+                  className={cn(
+                    "absolute left-3 bottom-3 w-40 rounded-3xl text-gray-600 hover:text-gray-600",
+                    {
+                      "text-primary-600 bg-primary-50 border-primary-200 hover:text-primary-600 hover:bg-primary-50":
+                        isDeepResearchEnabled,
+                    }
+                  )}
+                  onClick={() => setIsDeepResearchEnabled((prev) => !prev)}
+                >
+                  <Brain className="h-4 -mr-1" />
+                  Deep Research
+                </Button>
+
                 <Button
                   type="submit"
                   variant={"outline"}

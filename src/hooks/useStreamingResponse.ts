@@ -3,18 +3,26 @@ import { selectAllFilterIds } from "@/libs/redux/chatMessagesSlice";
 import { useState } from "react";
 import { useSelector } from "react-redux";
 
+interface Props {
+  setMessages: React.Dispatch<React.SetStateAction<ChatMessageType[]>>;
+  isDeepResearchEnabled: boolean;
+}
+
 function useStreamResponseForChat({
   setMessages,
-}: {
-  setMessages: React.Dispatch<React.SetStateAction<ChatMessageType[]>>;
-}) {
+  isDeepResearchEnabled,
+}: Props) {
   const [data, setData] = useState<any>();
   const [isLoading, setIsLoading] = useState(true);
 
   const filterIds = useSelector(selectAllFilterIds);
 
+  const apiEndpoint = isDeepResearchEnabled
+    ? "/chat/deep_think"
+    : "/chat/stream";
+
   async function runQuery(queryContent: string) {
-    const response = await fetch(process.env.API_URL + "/chat/deep_think", {
+    const response = await fetch(process.env.API_URL + apiEndpoint, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -33,7 +41,6 @@ function useStreamResponseForChat({
     setIsLoading(true);
 
     const reader = response.body.getReader();
-    // streamCallback([]);
     readStream(reader);
     return reader;
   }
@@ -46,48 +53,25 @@ function useStreamResponseForChat({
       }
 
       const text = new TextDecoder("utf-8").decode(value, { stream: true });
-      if (text.includes("COMPLETED _ END OF STREAM _ FINAL RESULT")) {
-        setData(text.replace(/.*COMPLETED _ END OF STREAM _ FINAL RESULT/, ""));
-      } else {
-        setMessages((prev) => {
-          const newMessages = [...prev];
-          const lastMessage = newMessages[newMessages.length - 1];
+      setMessages((prev) => {
+        const newMessages = [...prev];
+        const lastMessage = newMessages[newMessages.length - 1];
 
-          if (lastMessage && lastMessage.sender === "assistant") {
-            // Update existing assistant message
-            lastMessage.content += text;
-          } else {
-            setIsLoading(false);
-            // Create new assistant message
-            newMessages.push({
-              content: text,
-              sender: "assistant",
-              type: "deep-research",
-            });
-          }
+        if (lastMessage && lastMessage.sender === "assistant") {
+          // Update existing assistant message
+          lastMessage.content += text;
+        } else {
+          setIsLoading(false);
+          // Create new assistant message
+          newMessages.push({
+            content: text,
+            sender: "assistant",
+            type: isDeepResearchEnabled ? "deep-research" : "text",
+          });
+        }
 
-          return newMessages;
-        });
-
-        // const responses = text
-        //   .split("<<GGWWP>>")
-        //   .filter((response) => response !== "");
-        // responses.forEach((response) => {
-        //   // if response starts with $ then remove $ and append it to buffer and then set buffer to ""
-        //   if (response.startsWith("$")) {
-        //     streamCallback((prevValue) => [
-        //       ...prevValue,
-        //       buffer + response.slice(1),
-        //     ]);
-        //     setBuffer("");
-        //   } else {
-        //     setBuffer(buffer + response);
-        //   }
-        // });
-
-        // setResponses((prev) => prev + text)
-        // streamCallback((prevValue) => [...prevValue, text])
-      }
+        return newMessages;
+      });
 
       read();
     }
