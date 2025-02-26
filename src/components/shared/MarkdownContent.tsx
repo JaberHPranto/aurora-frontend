@@ -1,4 +1,5 @@
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 interface Props {
   children: string;
@@ -8,6 +9,7 @@ function MarkdownContent({ children }: Props) {
   return (
     <div>
       <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
         components={{
           h1: ({ node, ...props }) => (
             <h1
@@ -59,6 +61,35 @@ function MarkdownContent({ children }: Props) {
           a: ({ node, ...props }) => (
             <a
               className="text-blue-600 hover:text-blue-800 underline transition-colors duration-200"
+              {...props}
+            />
+          ),
+          table: ({ node, ...props }) => (
+            <table
+              className="w-full border-collapse mb-6 overflow-hidden border border-gray-200 rounded-xl"
+              {...props}
+            />
+          ),
+          thead: ({ node, ...props }) => (
+            <thead className="bg-[#f4f5f7]" {...props} />
+          ),
+          tbody: ({ node, ...props }) => (
+            <tbody
+              className="divide-y divide-gray-200 rounded-2xl"
+              {...props}
+            />
+          ),
+          tr: ({ node, ...props }) => <tr {...props} />,
+          th: ({ node, ...props }) => (
+            <th
+              className="px-4 py-3 text-left text-sm font-semibold text-primary-600 border border-gray-200/70"
+              {...props}
+            />
+          ),
+
+          td: ({ node, ...props }) => (
+            <td
+              className="px-4 py-3 text-sm text-gray-600 border border-gray-100 bg-white font-medium"
               {...props}
             />
           ),
