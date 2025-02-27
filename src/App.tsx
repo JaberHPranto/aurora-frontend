@@ -1,9 +1,9 @@
-import ChatStudio from "./pages/ChatStudio";
+import Router from "./router";
 
 function App() {
   return (
     <div className="font-onest">
-      <ChatStudio />
+      <Router />
     </div>
   );
 }

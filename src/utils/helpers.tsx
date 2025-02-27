@@ -74,3 +74,7 @@ export function groupMessagesByID(messages: DeepResearchMessage[]) {
     return acc;
   }, {} as DeepResearchGroup);
 }
+
+export const sleep = (ms: number): Promise<void> => {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+};
