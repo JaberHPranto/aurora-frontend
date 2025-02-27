@@ -12,7 +12,6 @@ function useStreamResponseForChat({
   setMessages,
   isDeepResearchEnabled,
 }: Props) {
-  const [data, setData] = useState<any>();
   const [isLoading, setIsLoading] = useState(true);
 
   const filterIds = useSelector(selectAllFilterIds);
@@ -78,7 +77,7 @@ function useStreamResponseForChat({
     read();
   }
 
-  return { data, runQuery, isLoading, setIsLoading };
+  return { runQuery, isLoading, setIsLoading };
 }
 
 export default useStreamResponseForChat;
