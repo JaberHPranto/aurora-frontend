@@ -14,6 +14,7 @@ export const apiSlice = createApi({
     "diseases",
     "final_recommendations",
     "filter_ids",
+    "prompts",
   ],
   endpoints: () => ({}),
 });

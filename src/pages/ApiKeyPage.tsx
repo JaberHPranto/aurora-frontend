@@ -90,7 +90,7 @@ export default function ApiKeyForm() {
               <Button
                 type="submit"
                 className={cn("w-full", {
-                  "bg-green-500": success,
+                  "bg-success": success,
                 })}
                 disabled={isLoading}
               >

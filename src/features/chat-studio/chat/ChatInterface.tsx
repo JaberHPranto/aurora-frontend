@@ -5,6 +5,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import useStreamResponseForChat from "@/hooks/useStreamingResponse";
 import { cn } from "@/libs/utils";
 import {
+  BookOpenText,
   Bot,
   Brain,
   PanelLeftClose,
@@ -13,6 +14,7 @@ import {
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { ChatMessage } from "./ChatMessage";
+import PromptTemplateModal from "./prompt-template/PromptTemplateModal";
 
 interface Props {
   isLeftPanelOpen: boolean;
@@ -35,6 +37,7 @@ const ChatInterface = ({
 }: Props) => {
   const [messages, setMessages] = useState<ChatMessageType[]>([]);
   const [isDeepResearchEnabled, setIsDeepResearchEnabled] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const { runQuery, isLoading } = useStreamResponseForChat({
     setMessages,
@@ -137,13 +140,15 @@ const ChatInterface = ({
           )}
           <div ref={messagesEndRef} />
         </ScrollArea>
-        <footer className="rounded-t-xl pb-6">
+
+        {/* Chat Input */}
+        <footer className="rounded-xl pb-6">
           <div className="mx-auto w-full max-w-3xl rounded-xl">
             <div>
-              <div className="flex items-end justify-start  rounded-xl border border-input relative">
+              <div className="items-end justify-start overflow-hidden rounded-xl border border-input relative">
                 <AutosizeTextarea
                   placeholder="Ask Anything..."
-                  minHeight={110}
+                  minHeight={60}
                   maxHeight={240}
                   value={inputText}
                   onChange={(e) => setInputText(e.target.value)}
@@ -155,39 +160,60 @@ const ChatInterface = ({
                       }
                     }
                   }}
-                  className="min-h-[110px] select-none resize-none overflow-hidden overflow-y-auto rounded-b-none rounded-xl border-0 bg-white  focus-visible:ring-0 focus-visible:ring-offset-0 px-3 pb-12 pt-3 focus-visible:outline-primary-200"
+                  className="select-none resize-none overflow-hidden overflow-y-auto rounded-b-none border-0   focus-visible:ring-0 focus-visible:ring-offset-0 px-3 pt-3 focus-visible:outline-none "
                 />
-                <Button
-                  type="submit"
-                  variant={"outline"}
-                  className={cn(
-                    "absolute left-3 bottom-3 w-40 rounded-3xl text-gray-600 hover:text-gray-600",
-                    {
-                      "text-primary-600 bg-primary-50 border-primary-200 hover:text-primary-600 hover:bg-primary-50":
-                        isDeepResearchEnabled,
-                    }
-                  )}
-                  onClick={() => setIsDeepResearchEnabled((prev) => !prev)}
-                >
-                  <Brain className="h-4 -mr-1" />
-                  Deep Research
-                </Button>
+                <div className="w-full flex items-center justify-between bg-white px-4 pb-4 pt-2">
+                  <div className="flex items-center gap-2 ">
+                    <Button
+                      type="submit"
+                      variant={"outline"}
+                      className={cn(
+                        " w-40 rounded-3xl text-gray-600 hover:text-gray-600",
+                        {
+                          "text-primary-600 bg-primary-50 border-primary-200 hover:text-primary-600 hover:bg-primary-50":
+                            isDeepResearchEnabled,
+                        }
+                      )}
+                      onClick={() => setIsDeepResearchEnabled((prev) => !prev)}
+                    >
+                      <Brain className="h-4 -mr-1" />
+                      Deep Research
+                    </Button>
 
-                <Button
-                  type="submit"
-                  variant={"outline"}
-                  size="icon"
-                  className="absolute right-3 bottom-3"
-                  disabled={!inputText.trim()}
-                  onClick={handleMessageSubmit}
-                >
-                  <Send className=" text-gray-600 h-4" />
-                </Button>
+                    <Button
+                      type="submit"
+                      variant={"outline"}
+                      className={cn(
+                        " w-40 rounded-3xl text-gray-600 hover:text-gray-600"
+                      )}
+                      onClick={() => setIsModalOpen(true)}
+                    >
+                      <BookOpenText className="h-4 -mr-1" />
+                      Prompt Library
+                    </Button>
+                  </div>
+                  <Button
+                    type="submit"
+                    variant={"outline"}
+                    size="icon"
+                    className=""
+                    disabled={!inputText.trim()}
+                    onClick={handleMessageSubmit}
+                  >
+                    <Send className=" text-gray-600 h-4" />
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
         </footer>
       </div>
+
+      <PromptTemplateModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        setPrompt={setInputText}
+      />
     </>
   );
 };
