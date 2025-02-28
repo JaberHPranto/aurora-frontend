@@ -39,7 +39,7 @@ const ChatInterface = ({
   const [isDeepResearchEnabled, setIsDeepResearchEnabled] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const { runQuery, isLoading } = useStreamResponseForChat({
+  const { runQuery, isLoading, hasDoneStreaming } = useStreamResponseForChat({
     setMessages,
     isDeepResearchEnabled,
   });
@@ -197,6 +197,7 @@ const ChatInterface = ({
                     variant={"outline"}
                     size="icon"
                     className=""
+                    loading={!hasDoneStreaming}
                     disabled={!inputText.trim()}
                     onClick={handleMessageSubmit}
                   >

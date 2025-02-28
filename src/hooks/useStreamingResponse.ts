@@ -13,6 +13,7 @@ function useStreamResponseForChat({
   isDeepResearchEnabled,
 }: Props) {
   const [isLoading, setIsLoading] = useState(true);
+  const [hasDoneStreaming, setHasDoneStreaming] = useState(true);
 
   const filterIds = useSelector(selectAllFilterIds);
 
@@ -21,6 +22,8 @@ function useStreamResponseForChat({
     : "/chat/stream";
 
   async function runQuery(queryContent: string) {
+    setIsLoading(true);
+
     const response = await fetch(process.env.API_URL + apiEndpoint, {
       method: "POST",
       headers: {
@@ -33,11 +36,11 @@ function useStreamResponseForChat({
       }),
     });
 
+    setHasDoneStreaming(false);
+
     if (!response.body) {
       throw new Error("ReadableStream not supported in this browser.");
     }
-
-    setIsLoading(true);
 
     const reader = response.body.getReader();
     readStream(reader);
@@ -48,6 +51,7 @@ function useStreamResponseForChat({
     async function read() {
       const { done, value } = await reader.read();
       if (done) {
+        setHasDoneStreaming(true);
         return;
       }
 
@@ -77,7 +81,7 @@ function useStreamResponseForChat({
     read();
   }
 
-  return { runQuery, isLoading, setIsLoading };
+  return { runQuery, isLoading, hasDoneStreaming };
 }
 
 export default useStreamResponseForChat;

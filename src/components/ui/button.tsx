@@ -67,7 +67,12 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         {...props}
       >
         {loading && (
-          <LoaderIcon className="mr-2 size-5 animate-spin text-muted" />
+          <LoaderIcon
+            className={cn(" size-5 animate-spin text-muted", {
+              "text-primary": variant === "outline",
+              "mr-2": loadingText,
+            })}
+          />
         )}
         <Slottable>{loading ? loadingText : children}</Slottable>
       </Comp>
