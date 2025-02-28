@@ -15,6 +15,8 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { ChatMessage } from "./ChatMessage";
 import PromptTemplateModal from "./prompt-template/PromptTemplateModal";
+import { useDispatch, useSelector } from "react-redux";
+import { addMessage, selectAllMessages } from "@/libs/redux/chatMessagesSlice";
 
 interface Props {
   isLeftPanelOpen: boolean;
@@ -39,10 +41,15 @@ const ChatInterface = ({
   const [isDeepResearchEnabled, setIsDeepResearchEnabled] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const { runQuery, isLoading, hasDoneStreaming } = useStreamResponseForChat({
-    setMessages,
-    isDeepResearchEnabled,
-  });
+  const dispatch = useDispatch();
+  const chatMessages = useSelector(selectAllMessages);
+  console.log("🚀 ~ chatMessages:", chatMessages);
+
+  const { runQuery, isLoading, hasDoneStreaming, assistantResponse } =
+    useStreamResponseForChat({
+      setMessages,
+      isDeepResearchEnabled,
+    });
 
   const [inputText, setInputText] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -55,12 +62,31 @@ const ChatInterface = ({
     scrollToBottom();
   }, [messages]);
 
+  useEffect(() => {
+    if (hasDoneStreaming && assistantResponse && messages.length > 0) {
+      const lastMessage = messages[messages.length - 1];
+      if (lastMessage.sender === "assistant") {
+        dispatch(
+          addMessage({
+            id: Date.now().toString(),
+            content: assistantResponse,
+            sender: "assistant",
+            type: isDeepResearchEnabled ? "deep-research" : "text",
+          })
+        );
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasDoneStreaming, assistantResponse]);
+
   const handleMessageSubmit = () => {
     const newMessage: ChatMessageType = {
       content: inputText,
       sender: "user",
       type: "text",
     };
+
+    dispatch(addMessage({ id: Date.now().toString(), ...newMessage }));
 
     setInputText("");
     setMessages((prev) => [...prev, newMessage]);

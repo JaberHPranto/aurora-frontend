@@ -4,6 +4,7 @@ export interface Message {
   id: string;
   content: string;
   sender: "user" | "assistant";
+  type: "text" | "deep-research";
 }
 
 interface ChatState {

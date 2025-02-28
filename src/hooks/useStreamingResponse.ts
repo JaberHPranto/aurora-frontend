@@ -14,6 +14,7 @@ function useStreamResponseForChat({
 }: Props) {
   const [isLoading, setIsLoading] = useState(true);
   const [hasDoneStreaming, setHasDoneStreaming] = useState(true);
+  const [assistantResponse, setAssistantResponse] = useState("");
 
   const filterIds = useSelector(selectAllFilterIds);
 
@@ -23,6 +24,7 @@ function useStreamResponseForChat({
 
   async function runQuery(queryContent: string) {
     setIsLoading(true);
+    setAssistantResponse("");
 
     const response = await fetch(process.env.API_URL + apiEndpoint, {
       method: "POST",
@@ -56,6 +58,8 @@ function useStreamResponseForChat({
       }
 
       const text = new TextDecoder("utf-8").decode(value, { stream: true });
+      setAssistantResponse((prev) => prev + text);
+
       setMessages((prev) => {
         const newMessages = [...prev];
         const lastMessage = newMessages[newMessages.length - 1];
@@ -81,7 +85,7 @@ function useStreamResponseForChat({
     read();
   }
 
-  return { runQuery, isLoading, hasDoneStreaming };
+  return { runQuery, isLoading, hasDoneStreaming, assistantResponse };
 }
 
 export default useStreamResponseForChat;
