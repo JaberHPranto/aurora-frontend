@@ -16,7 +16,7 @@ function useStreamResponseForChat({
   setMessages,
   isDeepResearchEnabled,
 }: Props) {
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [hasDoneStreaming, setHasDoneStreaming] = useState(true);
   const [assistantResponse, setAssistantResponse] = useState("");
 

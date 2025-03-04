@@ -177,7 +177,7 @@ const ChatInterface = ({
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && !e.shiftKey) {
                       e.preventDefault();
-                      if (inputText.trim()) {
+                      if (inputText.trim() && !isLoading) {
                         handleMessageSubmit();
                       }
                     }
