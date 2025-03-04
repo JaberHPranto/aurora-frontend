@@ -12,3 +12,9 @@ export interface FilterDataPayload {
   diseases?: string[];
   final_recommendations?: string[];
 }
+
+export interface ChatMessageType {
+  content: string;
+  sender: "user" | "assistant";
+  type: "text" | "deep-research";
+}

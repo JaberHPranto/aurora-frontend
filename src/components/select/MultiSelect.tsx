@@ -102,7 +102,7 @@ export function MultiSelect({
   );
 
   const filteredOptions = availableOptions.filter((option) =>
-    option.label.toLowerCase().includes(searchTerm.toLowerCase())
+    option.label?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (

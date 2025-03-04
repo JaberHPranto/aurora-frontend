@@ -3,7 +3,9 @@ import { AutosizeTextarea } from "@/components/ui/autosize-textarea";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import useStreamResponseForChat from "@/hooks/useStreamingResponse";
+import { addMessage } from "@/libs/redux/chatMessagesSlice";
 import { cn } from "@/libs/utils";
+import { ChatMessageType } from "@/types/common";
 import {
   BookOpenText,
   Bot,
@@ -13,22 +15,15 @@ import {
   Send,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { useDispatch } from "react-redux";
 import { ChatMessage } from "./ChatMessage";
 import PromptTemplateModal from "./prompt-template/PromptTemplateModal";
-import { useDispatch, useSelector } from "react-redux";
-import { addMessage, selectAllMessages } from "@/libs/redux/chatMessagesSlice";
 
 interface Props {
   isLeftPanelOpen: boolean;
   isRightPanelOpen: boolean;
   setIsLeftPanelOpen: (open: boolean) => void;
   setIsRightPanelOpen: (open: boolean) => void;
-}
-
-export interface ChatMessageType {
-  content: string;
-  sender: "user" | "assistant";
-  type: "text" | "deep-research";
 }
 
 const ChatInterface = ({
@@ -42,8 +37,6 @@ const ChatInterface = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const dispatch = useDispatch();
-  const chatMessages = useSelector(selectAllMessages);
-  console.log("🚀 ~ chatMessages:", chatMessages);
 
   const { runQuery, isLoading, hasDoneStreaming, assistantResponse } =
     useStreamResponseForChat({
@@ -158,8 +151,11 @@ const ChatInterface = ({
             />
           ))}
           {messages.length > 0 && isLoading && (
-            <div className="mb-4 text-left">
-              <div className="flex w-fit items-center gap-2 rounded-lg bg-secondary px-2 h-11 text-secondary-foreground">
+            <div className="mb-4 text-left flex items-center gap-3">
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary-400 to-primary-600">
+                <Bot className="h-4 w-4 text-white" />
+              </div>
+              <div className="flex w-fit items-center gap-2 rounded-lg bg-secondary px-2 h-10 text-secondary-foreground">
                 <TypingLoader />
               </div>
             </div>
@@ -218,13 +214,14 @@ const ChatInterface = ({
                       Prompt Library
                     </Button>
                   </div>
+
                   <Button
                     type="submit"
                     variant={"outline"}
                     size="icon"
                     className=""
                     loading={!hasDoneStreaming}
-                    disabled={!inputText.trim()}
+                    disabled={!inputText.trim() || isLoading}
                     onClick={handleMessageSubmit}
                   >
                     <Send className=" text-gray-600 h-4" />

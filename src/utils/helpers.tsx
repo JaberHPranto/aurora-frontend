@@ -1,3 +1,4 @@
+import { Message } from "@/libs/redux/chatMessagesSlice";
 import {
   DeepResearchGroup,
   DeepResearchMessage,
@@ -77,4 +78,16 @@ export function groupMessagesByID(messages: DeepResearchMessage[]) {
 
 export const sleep = (ms: number): Promise<void> => {
   return new Promise((resolve) => setTimeout(resolve, ms));
+};
+
+export const getConversationHistory = (chatMessages: Message[]) => {
+  // retrieving the last 6 messages (3 conversations)
+  const conversationHistory = chatMessages.slice(-6).map((message) => {
+    return {
+      role: message.sender === "user" ? "human" : "assistant",
+      content: message.content,
+    };
+  });
+
+  return conversationHistory;
 };

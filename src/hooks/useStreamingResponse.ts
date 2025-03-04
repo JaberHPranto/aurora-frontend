@@ -1,5 +1,9 @@
-import { ChatMessageType } from "@/features/chat-studio/chat/ChatInterface";
-import { selectAllFilterIds } from "@/libs/redux/chatMessagesSlice";
+import {
+  selectAllFilterIds,
+  selectAllMessages,
+} from "@/libs/redux/chatMessagesSlice";
+import { ChatMessageType } from "@/types/common";
+import { getConversationHistory } from "@/utils/helpers";
 import { useState } from "react";
 import { useSelector } from "react-redux";
 
@@ -17,6 +21,7 @@ function useStreamResponseForChat({
   const [assistantResponse, setAssistantResponse] = useState("");
 
   const filterIds = useSelector(selectAllFilterIds);
+  const chatMessages = useSelector(selectAllMessages);
 
   const apiEndpoint = isDeepResearchEnabled
     ? "/chat/deep_think"
@@ -34,7 +39,7 @@ function useStreamResponseForChat({
       body: JSON.stringify({
         query: queryContent,
         filtered_ids: filterIds.ids,
-        prev_messages: [],
+        prev_messages: getConversationHistory(chatMessages),
       }),
     });
 
