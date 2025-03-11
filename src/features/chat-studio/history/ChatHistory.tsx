@@ -21,7 +21,7 @@ const ChatHistory = ({ setMessageHistory }: Props) => {
   const handleStartNewChat = async () => {
     setLoadingNewChat(true);
 
-    await sleep(1000);
+    await sleep(500);
 
     setLoadingNewChat(false);
 

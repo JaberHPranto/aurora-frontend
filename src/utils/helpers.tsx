@@ -91,3 +91,13 @@ export const getConversationHistory = (chatMessages: Message[]) => {
 
   return conversationHistory;
 };
+
+// Function to check if scroll is at bottom
+export const checkIfElementAtBottom = (
+  container: Element,
+  threshold: number
+) => {
+  const { scrollTop, scrollHeight, clientHeight } = container;
+
+  return scrollHeight - (scrollTop + clientHeight) < threshold;
+};

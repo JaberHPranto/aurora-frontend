@@ -22,6 +22,7 @@ import {
 } from "@/utils/helpers";
 import { FiltersSchema, FiltersSchemaType } from "@/validators/filtersSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
@@ -57,6 +58,7 @@ const FilterConfigController = () => {
     if (filterIds) {
       dispatch(setFilterIds(filterIds));
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterIds]);
 
   const form = useForm<FiltersSchemaType>({
@@ -86,6 +88,11 @@ const FilterConfigController = () => {
     setSelectedFilterIds(convertObjectToQueryString(filtersData));
   };
 
+  const handleFilterReset = () => {
+    setSelectedFilterIds("");
+    form.reset();
+  };
+
   return (
     <Card className="h-[calc(100vh-2rem)] m-4 !border-gray-50 relative">
       {filterIds?.ids && (
@@ -103,7 +110,19 @@ const FilterConfigController = () => {
         </div>
       )}
       <CardHeader className="flex flex-row justify-between">
-        <CardTitle className="text-xl">Filter Configuration</CardTitle>
+        <CardTitle className="relative">
+          <h3 className="text-xl">Filter Configuration</h3>
+          {selectedFilterIds.length > 0 && (
+            <Button
+              className="absolute -left-4 top-[22px] text-gray-500 text-xs"
+              variant={"ghost"}
+              onClick={handleFilterReset}
+            >
+              Clear All
+              <X className="w-3 h-3" />
+            </Button>
+          )}
+        </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col h-[calc(100%-5rem)] pt-4 relative">
         <Form {...form}>

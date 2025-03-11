@@ -1,5 +1,9 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import TypingLoader from "@/components/shared/TypingLoadder";
-import { AutosizeTextarea } from "@/components/ui/autosize-textarea";
+import {
+  AutosizeTextarea,
+  AutosizeTextAreaRef,
+} from "@/components/ui/autosize-textarea";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import useStreamResponseForChat from "@/hooks/useStreamingResponse";
@@ -19,11 +23,14 @@ import { ChatMessage } from "./ChatMessage";
 import PromptTemplateModal from "./prompt-template/PromptTemplateModal";
 import { useAppDispatch, useAppSelector } from "@/libs/redux/hooks";
 import { toggleLeftPanel, toggleRightPanel } from "@/libs/redux/sidePanelSlice";
+import { checkIfElementAtBottom } from "@/utils/helpers";
 
 interface Props {
   messages: ChatMessageType[];
   setMessages: React.Dispatch<React.SetStateAction<ChatMessageType[]>>;
 }
+
+const SCROLL_THRESHOLD = 100;
 
 const ChatInterface = ({ messages, setMessages }: Props) => {
   const [isDeepResearchEnabled, setIsDeepResearchEnabled] = useState(false);
@@ -41,10 +48,37 @@ const ChatInterface = ({ messages, setMessages }: Props) => {
     });
 
   const [inputText, setInputText] = useState("");
+  const textareaRef = useRef<AutosizeTextAreaRef | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  const [userScrolled, setUserScrolled] = useState(false);
+  const [isAtBottom, setIsAtBottom] = useState(true);
+
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (!userScrolled || isAtBottom) {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
+  const handleScroll = (event: React.UIEvent<HTMLDivElement>) => {
+    // scrollable container (the viewport of ScrollArea of Radix)
+    const scrollContainer = event.currentTarget.querySelector(
+      "[data-radix-scroll-area-viewport]"
+    );
+
+    if (scrollContainer) {
+      const atBottom = checkIfElementAtBottom(
+        scrollContainer,
+        SCROLL_THRESHOLD
+      );
+      setIsAtBottom(atBottom);
+
+      if (!atBottom) {
+        setUserScrolled(true);
+      } else {
+        setUserScrolled(false);
+      }
+    }
   };
 
   useEffect(() => {
@@ -65,7 +99,6 @@ const ChatInterface = ({ messages, setMessages }: Props) => {
         );
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasDoneStreaming, assistantResponse]);
 
   const handleMessageSubmit = () => {
@@ -80,7 +113,18 @@ const ChatInterface = ({ messages, setMessages }: Props) => {
     setInputText("");
     setMessages((prev) => [...prev, newMessage]);
 
+    setUserScrolled(false);
+    setIsAtBottom(true);
+
     runQuery(inputText);
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+
+    setTimeout(() => {
+      textareaRef?.current?.textArea?.focus();
+    }, 100);
   };
 
   return (
@@ -137,7 +181,7 @@ const ChatInterface = ({ messages, setMessages }: Props) => {
           </Button>
         </div>
 
-        <ScrollArea className="flex-1 p-6">
+        <ScrollArea className="flex-1 p-6" onScrollCapture={handleScroll}>
           {messages.map((message, index) => (
             <ChatMessage
               key={index}
@@ -169,6 +213,8 @@ const ChatInterface = ({ messages, setMessages }: Props) => {
                   minHeight={60}
                   maxHeight={240}
                   value={inputText}
+                  ref={textareaRef}
+                  autoFocus
                   onChange={(e) => setInputText(e.target.value)}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && !e.shiftKey) {
@@ -231,7 +277,7 @@ const ChatInterface = ({ messages, setMessages }: Props) => {
 
       <PromptTemplateModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={handleModalClose}
         setPrompt={setInputText}
       />
     </>
