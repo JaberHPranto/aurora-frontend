@@ -2,12 +2,32 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { clearMessages } from "@/libs/redux/chatMessagesSlice";
+import { useAppDispatch } from "@/libs/redux/hooks";
+import { ChatMessageType } from "@/types/common";
 import { chatHistoryData } from "@/utils/data";
+import { sleep } from "@/utils/helpers";
 import { MessageCirclePlus } from "lucide-react";
-import { useDispatch } from "react-redux";
+import { useState } from "react";
 
-const ChatHistory = () => {
-  const dispatch = useDispatch();
+interface Props {
+  setMessageHistory: React.Dispatch<React.SetStateAction<ChatMessageType[]>>;
+}
+
+const ChatHistory = ({ setMessageHistory }: Props) => {
+  const [loadingNewChat, setLoadingNewChat] = useState(false);
+
+  const dispatch = useAppDispatch();
+
+  const handleStartNewChat = async () => {
+    setLoadingNewChat(true);
+
+    await sleep(1000);
+
+    setLoadingNewChat(false);
+
+    dispatch(clearMessages());
+    setMessageHistory([]);
+  };
 
   return (
     <Card className="h-full m-4 !border-gray-50">
@@ -19,7 +39,8 @@ const ChatHistory = () => {
       <div className="p-4">
         <Button
           className="w-full gap-2"
-          onClick={() => dispatch(clearMessages())}
+          onClick={handleStartNewChat}
+          loading={loadingNewChat}
         >
           <MessageCirclePlus className="h-4 w-4" />
           Start New Chat

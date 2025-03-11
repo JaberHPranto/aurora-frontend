@@ -3,7 +3,9 @@
 import ChatInterface from "@/features/chat-studio/chat/ChatInterface";
 import FilterConfigController from "@/features/chat-studio/filters/FilterConfigController";
 import ChatHistory from "@/features/chat-studio/history/ChatHistory";
+import { useAppSelector } from "@/libs/redux/hooks";
 import { cn } from "@/libs/utils";
+import { ChatMessageType } from "@/types/common";
 import { useState } from "react";
 
 interface PanelProps {
@@ -18,32 +20,27 @@ function Panel({ className, children }: PanelProps) {
 }
 
 const ChatStudio = () => {
-  const [isLeftPanelOpen, setIsLeftPanelOpen] = useState(true);
-  const [isRightPanelOpen, setIsRightPanelOpen] = useState(true);
+  const [messages, setMessages] = useState<ChatMessageType[]>([]);
+
+  const { isLeftPanelOpen, isRightPanelOpen } = useAppSelector(
+    (state) => state.sidePanel
+  );
 
   return (
     <div className="flex h-screen bg-background">
-      {/* Left Panel - History */}
       <Panel
         className={cn(
           "w-[380px] border-r transition-all duration-300 ease-in-out bg-[#F6F8FA]",
           !isLeftPanelOpen && "w-0 opacity-0 overflow-hidden"
         )}
       >
-        <ChatHistory />
+        <ChatHistory setMessageHistory={setMessages} />
       </Panel>
 
-      {/* Center Panel - Chat */}
       <Panel className="flex-1">
-        <ChatInterface
-          isLeftPanelOpen={isLeftPanelOpen}
-          isRightPanelOpen={isRightPanelOpen}
-          setIsLeftPanelOpen={setIsLeftPanelOpen}
-          setIsRightPanelOpen={setIsRightPanelOpen}
-        />
+        <ChatInterface messages={messages} setMessages={setMessages} />
       </Panel>
 
-      {/* Right Panel - Filters */}
       <Panel
         className={cn(
           "w-[480px] border-l transition-all duration-300 ease-in-out overflow-hidden bg-[#F6F8FA]",

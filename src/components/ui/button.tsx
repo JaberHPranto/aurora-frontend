@@ -68,7 +68,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       >
         {loading && (
           <LoaderIcon
-            className={cn(" size-5 animate-spin text-muted", {
+            className={cn("h-5 w-5 animate-spin text-muted", {
               "text-primary": variant === "outline",
               "mr-2": loadingText,
             })}

@@ -15,28 +15,24 @@ import {
   Send,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { useDispatch } from "react-redux";
 import { ChatMessage } from "./ChatMessage";
 import PromptTemplateModal from "./prompt-template/PromptTemplateModal";
+import { useAppDispatch, useAppSelector } from "@/libs/redux/hooks";
+import { toggleLeftPanel, toggleRightPanel } from "@/libs/redux/sidePanelSlice";
 
 interface Props {
-  isLeftPanelOpen: boolean;
-  isRightPanelOpen: boolean;
-  setIsLeftPanelOpen: (open: boolean) => void;
-  setIsRightPanelOpen: (open: boolean) => void;
+  messages: ChatMessageType[];
+  setMessages: React.Dispatch<React.SetStateAction<ChatMessageType[]>>;
 }
 
-const ChatInterface = ({
-  isLeftPanelOpen,
-  isRightPanelOpen,
-  setIsLeftPanelOpen,
-  setIsRightPanelOpen,
-}: Props) => {
-  const [messages, setMessages] = useState<ChatMessageType[]>([]);
+const ChatInterface = ({ messages, setMessages }: Props) => {
   const [isDeepResearchEnabled, setIsDeepResearchEnabled] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const dispatch = useDispatch();
+  const { isLeftPanelOpen, isRightPanelOpen } = useAppSelector(
+    (state) => state.sidePanel
+  );
+  const dispatch = useAppDispatch();
 
   const { runQuery, isLoading, hasDoneStreaming, assistantResponse } =
     useStreamResponseForChat({
@@ -114,7 +110,7 @@ const ChatInterface = ({
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => setIsLeftPanelOpen(!isLeftPanelOpen)}
+              onClick={() => dispatch(toggleLeftPanel())}
               className="shrink-0"
             >
               <PanelLeftClose
@@ -129,7 +125,7 @@ const ChatInterface = ({
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => setIsRightPanelOpen(!isRightPanelOpen)}
+            onClick={() => dispatch(toggleRightPanel())}
             className="shrink-0"
           >
             <PanelRightClose
