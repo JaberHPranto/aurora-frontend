@@ -1,17 +1,16 @@
 import MarkdownContent from "@/components/shared/MarkdownContent";
-import { FinalMessage } from "@/types/deep-research";
 import { Brain, Loader } from "lucide-react";
 
 interface Props {
   isResearchCompleted: boolean;
-  finalAnswer: FinalMessage | undefined;
+  finalAnswer: string | undefined;
 }
 
 const FinalAnswerSection = ({ isResearchCompleted, finalAnswer }: Props) => {
   return (
     <div>
       {isResearchCompleted ? (
-        finalAnswer?.value?.final_answer ? (
+        finalAnswer ? (
           <div>
             <div className="flex items-center gap-2 mb-4">
               <div className="w-8 h-8 rounded-md bg-blue-100 text-blue-600 flex items-center justify-center flex-shrink-0">
@@ -20,9 +19,7 @@ const FinalAnswerSection = ({ isResearchCompleted, finalAnswer }: Props) => {
               <h2 className="text-lg font-medium">Final Answer</h2>
             </div>
             <div>
-              <MarkdownContent>
-                {finalAnswer.value.final_answer}
-              </MarkdownContent>
+              <MarkdownContent>{finalAnswer}</MarkdownContent>
             </div>
           </div>
         ) : (

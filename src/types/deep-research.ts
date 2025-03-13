@@ -55,3 +55,15 @@ export type DeepResearchGroup = Record<
     research: (DeepResearchMessage & ResearchMessage) | null;
   }
 >;
+
+export interface ResearchParts {
+  think?: string;
+  question?: string;
+  answer?: string;
+}
+
+export interface DeepResearchSection {
+  type: "rewrite" | "research" | "final" | "unknown";
+  content?: string;
+  parts?: ResearchParts;
+}

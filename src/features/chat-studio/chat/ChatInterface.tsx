@@ -7,7 +7,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import useStreamResponseForChat from "@/hooks/useStreamingResponse";
-import { addMessage } from "@/libs/redux/chatMessagesSlice";
+import { addMessage, selectAllFilterIds } from "@/libs/redux/chatMessagesSlice";
 import { cn } from "@/libs/utils";
 import { ChatMessageType } from "@/types/common";
 import {
@@ -24,6 +24,9 @@ import PromptTemplateModal from "./prompt-template/PromptTemplateModal";
 import { useAppDispatch, useAppSelector } from "@/libs/redux/hooks";
 import { toggleLeftPanel, toggleRightPanel } from "@/libs/redux/sidePanelSlice";
 import { checkIfElementAtBottom } from "@/utils/helpers";
+import { useSelector } from "react-redux";
+
+import { toast } from "sonner";
 
 interface Props {
   messages: ChatMessageType[];
@@ -40,6 +43,9 @@ const ChatInterface = ({ messages, setMessages }: Props) => {
     (state) => state.sidePanel
   );
   const dispatch = useAppDispatch();
+
+  const filterIds = useSelector(selectAllFilterIds);
+  const filterCount = filterIds.ids.length;
 
   const { runQuery, isLoading, hasDoneStreaming, assistantResponse } =
     useStreamResponseForChat({
@@ -102,6 +108,20 @@ const ChatInterface = ({ messages, setMessages }: Props) => {
   }, [hasDoneStreaming, assistantResponse]);
 
   const handleMessageSubmit = () => {
+    if (filterCount === 0) {
+      toast.info("No records has been selected", {
+        position: "top-center",
+      });
+      return;
+    }
+
+    if (filterCount > 30) {
+      toast.info("Select up to 30 records to enable conversation", {
+        position: "top-center",
+      });
+      return;
+    }
+
     const newMessage: ChatMessageType = {
       content: inputText,
       sender: "user",

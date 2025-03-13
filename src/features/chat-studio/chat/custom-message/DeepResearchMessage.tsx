@@ -5,12 +5,12 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Card, CardHeader } from "@/components/ui/card";
-import { DeepResearchMessage } from "@/types/deep-research";
-import { groupMessagesByID, parseJsonl } from "@/utils/helpers";
+import { DeepResearchSection } from "@/types/deep-research";
+import { parseStreamedText } from "@/utils/helpers";
 import { Search } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import FinalAnswerSection from "./components/FinalAnswerSection";
-import ResearchContent from "./components/ResearchContent";
+import { ResearchContent } from "./components/ResearchContent";
 
 interface Props {
   content: string;
@@ -18,40 +18,50 @@ interface Props {
 
 export default function DeepResearchAgent({ content }: Props) {
   const [openAccordionId, setOpenAccordionId] = useState<string>();
-  const [prevMessageCount, setPrevMessageCount] = useState(0);
+  const [prevGroupCount, setPrevGroupCount] = useState(0);
 
-  const researchContent = parseJsonl(content) as DeepResearchMessage[];
+  const researchContent = useMemo(() => parseStreamedText(content), [content]);
 
-  const { rewriteMessage, finalAnswer, isResearchCompleted, groupedMessages } =
-    useMemo(
-      () => ({
-        rewriteMessage: researchContent.find((msg) => msg.type === "rewrite"),
-        finalAnswer: researchContent.find((msg) => msg.type === "final"),
-        isResearchCompleted: researchContent.find(
-          (msg) => msg.type === "completed_research"
-        ),
-        groupedMessages: groupMessagesByID(researchContent),
-      }),
-      [researchContent]
-    );
+  const { rewriteSection, researchSections, finalAnswer } = useMemo(() => {
+    let rewrite = undefined;
+    const research = [];
+    let final = undefined;
+
+    for (const section of researchContent) {
+      switch (section.type) {
+        case "rewrite":
+          rewrite = section;
+          break;
+        case "research":
+          research.push(section);
+          break;
+        case "final":
+          final = section;
+          break;
+      }
+    }
+
+    return {
+      rewriteSection: rewrite,
+      researchSections: research,
+      finalAnswer: final,
+    };
+  }, [researchContent]);
 
   useEffect(() => {
-    const messageIds = Object.keys(groupedMessages);
-    const currentCount = messageIds.length;
+    const currentGroupCount = researchSections.length ?? 0;
 
-    if (currentCount > prevMessageCount) {
-      // New message has arrived
-      const lastId = messageIds[currentCount - 1];
-      setOpenAccordionId(`item-${lastId}`);
-      setPrevMessageCount(currentCount);
+    if (currentGroupCount > prevGroupCount) {
+      setOpenAccordionId(`item-${currentGroupCount - 1}`);
+      setPrevGroupCount(currentGroupCount);
     }
-  }, [groupedMessages, prevMessageCount]);
+  }, [prevGroupCount, researchSections.length]);
 
   return (
     <div className="p-3">
       <div className=" space-y-6">
         <h1 className="text-2xl font-semibold leading-tight text-gray-800">
-          {rewriteMessage?.value?.rewritten_query || "Deep Research"}
+          {rewriteSection?.content || "Deep Research"}
         </h1>
 
         <Card>
@@ -68,7 +78,7 @@ export default function DeepResearchAgent({ content }: Props) {
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-sm text-gray-500 mr-3">
-                        {Object.keys(groupedMessages).length} research points
+                        {researchSections?.length} research points
                       </span>
                     </div>
                   </div>
@@ -78,7 +88,7 @@ export default function DeepResearchAgent({ content }: Props) {
               {/* Research Content */}
               <AccordionContent>
                 <ResearchContent
-                  groupedMessages={groupedMessages}
+                  researchSections={researchSections as DeepResearchSection[]}
                   openAccordionId={openAccordionId}
                   setOpenAccordionId={setOpenAccordionId}
                 />
@@ -89,8 +99,8 @@ export default function DeepResearchAgent({ content }: Props) {
 
         {/* Final Answer */}
         <FinalAnswerSection
-          isResearchCompleted={Boolean(isResearchCompleted)}
-          finalAnswer={finalAnswer}
+          isResearchCompleted={Boolean(finalAnswer)}
+          finalAnswer={finalAnswer?.content}
         />
       </div>
     </div>

@@ -3,6 +3,7 @@ import {
   DeepResearchGroup,
   DeepResearchMessage,
   ResearchMessage,
+  ResearchParts,
   ThinkMessage,
 } from "@/types/deep-research";
 
@@ -100,4 +101,57 @@ export const checkIfElementAtBottom = (
   const { scrollTop, scrollHeight, clientHeight } = container;
 
   return scrollHeight - (scrollTop + clientHeight) < threshold;
+};
+
+export const parseStreamedText = (text: string) => {
+  if (!text) return [];
+
+  const sections = text.split("___VIVA__SEPARATOR___");
+
+  return sections
+    .map((sectionText) => {
+      let type = "unknown";
+      let content = sectionText.trim();
+
+      // Question Rewrite
+      if (content.startsWith("__VIVA__REWRITE__")) {
+        type = "rewrite";
+        content = content.replace("__VIVA__REWRITE__", "").trim();
+      }
+      // Deep Research Group
+      else if (content.includes("__VIVA__THINK__")) {
+        const parts: ResearchParts = {};
+
+        const thinkMatch = content.match(
+          /__VIVA__THINK__([\s\S]*?)(?=__VIVA__RESEARCH_QUESTION__|$)/
+        );
+        if (thinkMatch && thinkMatch[1]) {
+          parts.think = thinkMatch[1].trim();
+        }
+
+        const questionMatch = content.match(
+          /__VIVA__RESEARCH_QUESTION__([\s\S]*?)(?=___VIVA__RESEARCH_ANSWER___|$)/
+        );
+        if (questionMatch && questionMatch[1]) {
+          parts.question = questionMatch[1].trim();
+        }
+
+        const answerMatch = content.match(
+          /___VIVA__RESEARCH_ANSWER___([\s\S]*?)$/
+        );
+        if (answerMatch && answerMatch[1]) {
+          parts.answer = answerMatch[1].trim();
+        }
+
+        return { type: "research", parts };
+      }
+      // Final Answer
+      else if (content.startsWith("__VIVA__FINAL__")) {
+        type = "final";
+        content = content.replace("__VIVA__FINAL__", "").trim();
+      }
+
+      return { type, content };
+    })
+    .filter((section) => section.type !== "unknown" || section.content);
 };

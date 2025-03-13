@@ -24,7 +24,7 @@ function useStreamResponseForChat({
   const chatMessages = useSelector(selectAllMessages);
 
   const apiEndpoint = isDeepResearchEnabled
-    ? "/chat/deep_think"
+    ? "/chat/deep_think/stream"
     : "/chat/stream";
 
   async function runQuery(queryContent: string) {
