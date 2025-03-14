@@ -38,9 +38,9 @@ const SimpleSelect = forwardRef<HTMLDivElement, Props>(
             className={cn(
               "w-full",
               {
-                "border-destructive focus-visible:border-input focus-visible:ring-destructive":
+                "border-destructive focus-visible:border-none focus-visible:ring-0":
                   error,
-                "text-muted-foreground": !Boolean(value),
+                "text-muted-foreground": !value,
               },
               className
             )}

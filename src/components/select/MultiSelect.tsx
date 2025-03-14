@@ -25,7 +25,7 @@ export function MultiSelect({
   options = [],
   value = [],
   onChange,
-  placeholder = "Select options...",
+  placeholder = "Select options",
   error,
   isLoading = false,
 }: MultiSelectProps) {

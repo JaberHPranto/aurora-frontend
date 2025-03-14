@@ -1,12 +1,12 @@
 import HookFormItem from "@/components/hook-form/HookFormItem";
 import { MultiSelect } from "@/components/select/MultiSelect";
+import SimpleSelect from "@/components/select/SimpleSelect";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form } from "@/components/ui/form";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { setFilterIds } from "@/libs/redux/chatMessagesSlice";
 import {
-  useGetAvailableAgenciesQuery,
   useGetAvailableBiomarkersQuery,
   useGetAvailableCountriesQuery,
   useGetAvailableDiseasesQuery,
@@ -15,6 +15,7 @@ import {
   useGetAvailableModalitiesQuery,
   useGetFilterIdsQuery,
 } from "@/services/filters/filtersApi";
+import { decisionDateData } from "@/utils/data";
 import {
   convertObjectToQueryString,
   formatSelectOptions,
@@ -34,8 +35,7 @@ const FilterConfigController = () => {
 
   const { data: countries, isLoading: isCountriesLoading } =
     useGetAvailableCountriesQuery();
-  const { data: agencies, isLoading: isAgenciesLoading } =
-    useGetAvailableAgenciesQuery();
+
   const { data: drugs, isLoading: isDrugsLoading } =
     useGetAvailableDrugsQuery();
   const { data: biomarkers, isLoading: isBiomarkersLoading } =
@@ -71,6 +71,7 @@ const FilterConfigController = () => {
       modalities: [],
       diseases: [],
       final_recommendations: [],
+      dt_upto: "",
     },
   });
 
@@ -79,12 +80,13 @@ const FilterConfigController = () => {
       (acc: { [key: string]: string[] }, [key, value]) => {
         if (Array.isArray(value) && value.length > 0) {
           acc[key] = formatSelectValues(value);
+        } else if (typeof value === "string") {
+          acc[key] = [value];
         }
         return acc;
       },
       {}
     );
-
     setSelectedFilterIds(convertObjectToQueryString(filtersData));
   };
 
@@ -138,14 +140,10 @@ const FilterConfigController = () => {
                   isLoading={isCountriesLoading}
                 />
               </HookFormItem>
-              <HookFormItem name="agencies" label="Agency">
-                <MultiSelect
-                  options={
-                    agencies?.agencies
-                      ? formatSelectOptions(agencies.agencies)
-                      : []
-                  }
-                  isLoading={isAgenciesLoading}
+              <HookFormItem name="dt_upto" label="HTA Decision Date">
+                <SimpleSelect
+                  options={decisionDateData}
+                  placeholder="Select option"
                 />
               </HookFormItem>
               <HookFormItem name="drugs" label="Drug Name">

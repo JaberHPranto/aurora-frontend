@@ -12,6 +12,7 @@ export const FiltersSchema = z.object({
   modalities: queryArraySchema,
   diseases: queryArraySchema,
   final_recommendations: queryArraySchema,
+  dt_upto: z.string().optional(),
 });
 
 export type FiltersSchemaType = z.infer<typeof FiltersSchema>;

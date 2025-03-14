@@ -10,52 +10,25 @@ export const chatHistoryData = [
   { id: 9, title: "The Ethics of Artificial Intelligence" },
   { id: 10, title: "How to Build a Strong Personal Brand Online" },
 ];
-
-export const countriesMockData = [
-  { label: "USA", value: "usa" },
-  { label: "Germany", value: "germany" },
-  { label: "Japan", value: "japan" },
-  { label: "Canada", value: "canada" },
-  { label: "Australia", value: "australia" },
-];
-
-export const agenciesMockData = [
-  { label: "FDA", value: "fda" },
-  { label: "EMA", value: "ema" },
-  { label: "MHRA", value: "mhra" },
-  { label: "TGA", value: "tga" },
-];
-
-export const drugsMockData = [
-  { label: "Aspirin", value: "aspirin" },
-  { label: "Ibuprofen", value: "ibuprofen" },
-  { label: "Paracetamol", value: "paracetamol" },
-  { label: "Metformin", value: "metformin" },
-];
-
-export const biomarkersMockData = [
-  { label: "BRCA1", value: "brca1" },
-  { label: "HER2", value: "her2" },
-  { label: "PSA", value: "psa" },
-  { label: "EGFR", value: "egfr" },
-];
-
-export const modalitiesMockData = [
-  { label: "Immunotherapy", value: "immunotherapy" },
-  { label: "Chemotherapy", value: "chemotherapy" },
-  { label: "Radiotherapy", value: "radiotherapy" },
-  { label: "Gene Therapy", value: "gene_therapy" },
-];
-
-export const diseasesMockData = [
-  { label: "Diabetes", value: "diabetes" },
-  { label: "Hypertension", value: "hypertension" },
-  { label: "Alzheimer's", value: "alzheimers" },
-  { label: "Parkinson's", value: "parkinsons" },
-];
-
-export const finalRecommendationsMockData = [
-  { label: "Approved", value: "approved" },
-  { label: "Pending", value: "pending" },
-  { label: "Rejected", value: "rejected" },
+export const decisionDateData = [
+  {
+    label: "Last 1 year",
+    value: "1y",
+  },
+  {
+    label: "Last 2 years",
+    value: "2y",
+  },
+  {
+    label: "Last 3 years",
+    value: "3y",
+  },
+  {
+    label: "Last 4 years",
+    value: "4y",
+  },
+  {
+    label: "Last 5 years",
+    value: "5y",
+  },
 ];
