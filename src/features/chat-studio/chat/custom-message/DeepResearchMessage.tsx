@@ -6,7 +6,7 @@ import {
 } from "@/components/ui/accordion";
 import { Card, CardHeader } from "@/components/ui/card";
 import { DeepResearchSection } from "@/types/deep-research";
-import { parseStreamedText } from "@/utils/helpers";
+import { parseStreamedText } from "@/utils/parser";
 import { Search } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import FinalAnswerSection from "./components/FinalAnswerSection";
