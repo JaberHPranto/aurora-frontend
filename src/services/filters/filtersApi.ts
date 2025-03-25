@@ -40,6 +40,13 @@ export const filtersApi = apiSlice.injectEndpoints({
         };
       },
     }),
+    getTableView: builder.query<any, string>({
+      query: (ids) => {
+        return {
+          url: `/filters/table_view?${ids}`,
+        };
+      },
+    }),
   }),
 });
 
@@ -52,4 +59,5 @@ export const {
   useGetAvailableDiseasesQuery,
   useGetAvailableFinalRecommendationsQuery,
   useGetFilterIdsQuery,
+  useGetTableViewQuery,
 } = filtersApi;

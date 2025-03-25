@@ -3,6 +3,13 @@ import { MultiSelect } from "@/components/select/MultiSelect";
 import SimpleSelect from "@/components/select/SimpleSelect";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Form } from "@/components/ui/form";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { setFilterIds } from "@/libs/redux/chatMessagesSlice";
@@ -27,6 +34,7 @@ import { X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
+import TableView from "./TableView";
 
 const FilterConfigController = () => {
   const dispatch = useDispatch();
@@ -98,17 +106,31 @@ const FilterConfigController = () => {
   return (
     <Card className="h-[calc(100vh-2rem)] m-4 !border-gray-50 relative">
       {filterIds?.ids && (
-        <div className="text-center absolute right-4 top-4">
-          <div className="bg-primary-100 text-primary-700 font-semibold text-2xl py-2 rounded-lg">
+        <div className="text-center absolute right-4 top-4 z-10">
+          <p className="text-xs text-gray-500 font-medium">Records Selected</p>
+          <div className="bg-primary-100 text-primary-700 font-semibold text-2xl py-2 rounded-lg mt-1">
             {filterIds.ids.length > 0 &&
             filterIds.ids.length < 10 &&
             filterIds.ids.length
               ? `0${filterIds.ids.length}`
               : filterIds.ids.length}
           </div>
-          <p className="text-xs text-gray-500 font-medium mt-1">
-            Records Selected
-          </p>
+
+          {filterIds.ids.length > 0 && filterIds.ids.length <= 30 && (
+            <Dialog>
+              <DialogTrigger asChild>
+                <p className="text-xs text-gray-500 font-medium mt-1 cursor-pointer hover:underline hover:text-primary-700">
+                  View Records
+                </p>
+              </DialogTrigger>
+              <DialogContent className="max-w-[calc(100vw-10rem)] max-h-screen">
+                <DialogHeader>
+                  <DialogTitle>Record Table</DialogTitle>
+                </DialogHeader>
+                <TableView ids={filterIds.ids} />
+              </DialogContent>
+            </Dialog>
+          )}
         </div>
       )}
       <CardHeader className="flex flex-row justify-between">
