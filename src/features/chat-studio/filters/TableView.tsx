@@ -8,7 +8,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useGetTableViewQuery } from "@/services/filters/filtersApi";
-import { Loader } from "lucide-react";
 import { Link } from "react-router-dom";
 
 interface TableViewProps {
@@ -17,9 +16,8 @@ interface TableViewProps {
 
 const TableView = ({ ids }: TableViewProps) => {
   const idsString = ids.map((id) => `ids=${id}`).join("&");
-
   const { data: tableData, isLoading } = useGetTableViewQuery(idsString);
-  console.log("tableData", tableData);
+  
   if (isLoading) {
     return (
         <Spinner className="min-h-[60vh]"/>
