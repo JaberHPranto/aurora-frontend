@@ -40,7 +40,6 @@ const TableView = ({ ids }: TableViewProps) => {
             <TableHead>RWE Used</TableHead>
             <TableHead>Final Recommendation</TableHead>
             <TableHead>HTA Status</TableHead>
-            <TableHead>Quintiles Link</TableHead>
             <TableHead>Web URL</TableHead>
             <TableHead>Reimbursed Indication</TableHead>
           </TableRow>
@@ -50,25 +49,18 @@ const TableView = ({ ids }: TableViewProps) => {
             <TableRow key={item.ID}>
               <TableCell>{item.ID}</TableCell>
               <TableCell>{item.COUNTRY}</TableCell>
-              <TableCell>{item.HTA_DECISION_DT}</TableCell>
+              <TableCell
+              className="min-w-[140px]"
+              >{item.HTA_DECISION_DT}</TableCell>
               <TableCell className="min-w-[140px]">
                 {item.PRIMARY_DISEASE}
               </TableCell>{" "}
-              <TableCell className="min-w-[180px]">
+              <TableCell className="max-w-[180px]">
                 {item.TREATMENT_LINE}
               </TableCell>
               <TableCell>{item.RWE_USED}</TableCell>
               <TableCell>{item.FINAL_RECOMMENDATION}</TableCell>
-              <TableCell>{item.HTA_STATUS}</TableCell>{" "}
-              <TableCell>
-                <Link
-                  to={item.QUINTILES_LINK}
-                  target="_blank"
-                  className="text-blue-500 hover:underline"
-                >
-                  Link
-                </Link>
-              </TableCell>
+              <TableCell>{item.HTA_STATUS}</TableCell>
               <TableCell>
                 <Link
                   to={item.WEB_URL}
