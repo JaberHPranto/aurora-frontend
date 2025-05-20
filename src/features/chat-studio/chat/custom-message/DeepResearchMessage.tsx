@@ -52,10 +52,16 @@ export default function DeepResearchAgent({ content }: Props) {
     const currentGroupCount = researchSections.length ?? 0;
 
     if (currentGroupCount > prevGroupCount) {
+      if (
+        !researchSections[currentGroupCount - 1]?.parts?.question ||
+        !researchSections[currentGroupCount - 1]?.parts?.answer
+      )
+        return;
+
       setOpenAccordionId(`item-${currentGroupCount - 1}`);
       setPrevGroupCount(currentGroupCount);
     }
-  }, [prevGroupCount, researchSections.length]);
+  }, [prevGroupCount, researchSections, researchSections.length]);
 
   return (
     <div className="p-3">

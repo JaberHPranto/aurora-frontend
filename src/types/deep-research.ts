@@ -63,6 +63,7 @@ export interface ResearchParts {
 }
 
 export interface DeepResearchSection {
+  id: number;
   type: "rewrite" | "research" | "final" | "unknown";
   content?: string;
   parts?: ResearchParts;

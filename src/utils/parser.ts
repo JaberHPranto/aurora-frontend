@@ -52,7 +52,7 @@ export const parseStreamedText = (text: string) => {
   const sections = text.split("___VIVA__SEPARATOR___");
 
   return sections
-    .map((sectionText) => {
+    .map((sectionText, index) => {
       let type = "unknown";
       let content = sectionText.trim();
 
@@ -94,7 +94,7 @@ export const parseStreamedText = (text: string) => {
         content = content.replace("__VIVA__FINAL__", "").trim();
       }
 
-      return { type, content };
+      return { type, content, id: index };
     })
     .filter((section) => section.type !== "unknown" || section.content);
 };

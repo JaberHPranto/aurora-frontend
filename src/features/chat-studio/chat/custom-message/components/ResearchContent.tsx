@@ -61,46 +61,48 @@ export const ResearchContent = ({
                     <AccordionTrigger className="hover:no-underline p-0 [&[data-state=open]>p]:line-clamp-none">
                       {/* Thought */}
                       <p className="text-base text-muted-foreground text-left line-clamp-1">
-                        {section?.parts?.think || "Thinking..."}
+                        {section?.parts?.think || (
+                          <span className="animate-pulse">"Thinking..."</span>
+                        )}
                       </p>
                     </AccordionTrigger>
                     <AccordionContent className="pt-4 space-y-6">
                       {section?.parts?.think && (
                         <div className="text-gray-600 space-y-6">
-                          {/* Research Question Section */}
-                          <div className="space-y-2">
-                            <div className="flex items-center gap-2 text-gray-700">
-                              <HelpCircle className="w-[18px] h-[18px] text-blue-500" />
-                              <h4 className="font-medium text-base">
-                                Research Question
-                              </h4>
-                            </div>
-                            <div className="bg-blue-50 border border-blue-100 rounded-lg px-4 py-3 text-gray-800 leading-6">
-                              <div className="flex gap-3">
-                                <p>
-                                  {section?.parts?.question || "Researching..."}
-                                </p>
+                          {/* Research Question Section - Only show if question exists */}
+                          {section?.parts?.question && (
+                            <div className="space-y-2">
+                              <div className="flex items-center gap-2 text-gray-700">
+                                <HelpCircle className="w-[18px] h-[18px] text-blue-500" />
+                                <h4 className="font-medium text-base">
+                                  Research Question
+                                </h4>
+                              </div>
+                              <div className="bg-blue-50 border border-blue-100 rounded-lg px-4 py-3 text-gray-800 leading-6">
+                                <div className="flex gap-3">
+                                  <p>{section.parts.question}</p>
+                                </div>
                               </div>
                             </div>
-                          </div>
+                          )}
 
-                          {/* Research Outcome Section */}
-                          <div className="space-y-2">
-                            <div className="flex items-center gap-2 text-gray-700">
-                              <FileText className="w-[18px] h-[18px] text-blue-500" />
-                              <h4 className="font-medium text-base">
-                                Research Outcome
-                              </h4>
-                            </div>
+                          {/* Research Outcome Section - Only show if answer exists */}
+                          {section?.parts?.answer && (
+                            <div className="space-y-2">
+                              <div className="flex items-center gap-2 text-gray-700">
+                                <FileText className="w-[18px] h-[18px] text-blue-500" />
+                                <h4 className="font-medium text-base">
+                                  Research Outcome
+                                </h4>
+                              </div>
 
-                            <div className="gap-4">
-                              <div className="bg-gray-100 leading-6 rounded-lg p-4 border border-gray-100 transition-all hover:shadow-sm text-gray-700">
-                                <p>
-                                  {section?.parts?.answer || "Researching..."}
-                                </p>
+                              <div className="gap-4">
+                                <div className="bg-gray-100 leading-6 rounded-lg p-4 border border-gray-100 transition-all hover:shadow-sm text-gray-700">
+                                  <p>{section.parts.answer}</p>
+                                </div>
                               </div>
                             </div>
-                          </div>
+                          )}
                         </div>
                       )}
                     </AccordionContent>
